@@ -4,7 +4,6 @@ var Orbital = require('../lib/orbital');
 
 var config = {
   fork: true,
-  cache: './cache',
   modules: './modules'
 };
 
