@@ -1,0 +1,29 @@
+#!/bin/node
+
+var Orbital = require('../lib/orbital');
+
+var config = {
+  fork: true,
+  cache: './cache',
+  modules: './modules'
+};
+
+var orb = new Orbital(config);
+orb.start(function() {
+  var command1 = {
+    name: 'install',
+    args: {
+      package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.2.tgz',
+    }
+  };
+
+  var command2 = {
+      name: 'install',
+      args: {
+        package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.1.tgz',
+      }
+    };
+
+  orb.processCommands([command1, command2]);
+});
+

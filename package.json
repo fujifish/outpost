@@ -1,0 +1,36 @@
+{
+  "name": "orbital",
+  "version": "0.1.0",
+  "description": "Remote installation and configuration system",
+  "author": "Capriza Inc. <backend@capriza.com>",
+  "maintainers": [
+    "Nadav Fischer <nadav.fischer@capriza.com>"
+  ],
+  "homepage": "http://github.com/capriza/node-orbital",
+  "repository" : { "type" : "git" , "url" : "http://github.com/capriza/node-orbital.git" },
+  "bugs": {
+    "url": "https://github.com/capriza/node-orbital/issues"
+  },
+  "keywords": ["remote install"],
+  "dependencies": {
+    "log" : "1.4.0",
+    "proxying-agent": "0.1.6",
+    "npm": "2.5.0"
+  },
+  "devDependencies": {
+    "should": "4.0.4",
+    "mocha": "1.21.4"
+  },
+  "engines": {
+    "node": ">=0.10.3"
+  },
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "mocha test"
+  }
+}
