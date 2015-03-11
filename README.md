@@ -1,2 +1,2 @@
-# orbital
+# outpost
 Remote management and installation

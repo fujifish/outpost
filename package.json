@@ -1,15 +1,15 @@
 {
-  "name": "orbital",
+  "name": "outpost",
   "version": "0.1.0",
   "description": "Remote installation and configuration system",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
     "Nadav Fischer <nadav.fischer@capriza.com>"
   ],
-  "homepage": "http://github.com/capriza/node-orbital",
-  "repository" : { "type" : "git" , "url" : "http://github.com/capriza/node-orbital.git" },
+  "homepage": "http://github.com/capriza/node-outpost",
+  "repository" : { "type" : "git" , "url" : "http://github.com/capriza/node-outpost.git" },
   "bugs": {
-    "url": "https://github.com/capriza/node-orbital/issues"
+    "url": "https://github.com/capriza/node-outpost/issues"
   },
   "keywords": ["remote install"],
   "dependencies": {

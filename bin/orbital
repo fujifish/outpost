@@ -1,14 +1,14 @@
 #!/bin/node
 
-var Orbital = require('../lib/orbital');
+var Outpost = require('../lib/outpost');
 
 var config = {
   fork: true,
   modules: './modules'
 };
 
-var orb = new Orbital(config);
-orb.start(function() {
+var outpost = new Outpost(config);
+outpost.start(function() {
   var command1 = {
     name: 'install',
     args: {
@@ -23,6 +23,6 @@ orb.start(function() {
       }
     };
 
-  orb.processCommands([command1, command2]);
+  outpost.processCommands([command1, command2]);
 });
 
