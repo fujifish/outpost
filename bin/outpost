@@ -1,4 +1,4 @@
-#!/bin/node
+#!/usr/local/bin/node
 
 var Outpost = require('../lib/outpost');
 
@@ -10,19 +10,21 @@ var config = {
 var outpost = new Outpost(config);
 outpost.start(function() {
   var command1 = {
-    name: 'install',
+    type: 'install',
     args: {
       package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.2.tgz',
+      install: '../../../../testInstall.js'
     }
   };
 
   var command2 = {
-      name: 'install',
-      args: {
-        package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.1.tgz',
-      }
-    };
+    type: 'install',
+    args: {
+      package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.1.tgz',
+      install: '../../../../testInstallError.js'
+    }
+  };
 
-  outpost.processCommands([command1, command2]);
+  outpost.process([command1, command2]);
 });
 

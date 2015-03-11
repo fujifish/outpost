@@ -6,10 +6,10 @@
   "maintainers": [
     "Nadav Fischer <nadav.fischer@capriza.com>"
   ],
-  "homepage": "http://github.com/capriza/node-outpost",
-  "repository" : { "type" : "git" , "url" : "http://github.com/capriza/node-outpost.git" },
+  "homepage": "http://github.com/capriza/outpost",
+  "repository" : { "type" : "git" , "url" : "http://github.com/capriza/outpost.git" },
   "bugs": {
-    "url": "https://github.com/capriza/node-outpost/issues"
+    "url": "https://github.com/capriza/outpost/issues"
   },
   "keywords": ["remote install"],
   "dependencies": {
