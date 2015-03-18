@@ -13,7 +13,7 @@ outpost.start(function() {
     type: 'install',
     args: {
       package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.2.tgz',
-      install: '../../../../testInstall.js'
+      script: '../../../../testInstall.js'
     }
   };
 
@@ -21,7 +21,7 @@ outpost.start(function() {
     type: 'install',
     args: {
       package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.1.tgz',
-      install: '../../../../testInstallError.js'
+      script: '../../../../testInstallError.js'
     }
   };
 
