@@ -2,29 +2,26 @@
 
 var Outpost = require('../lib/outpost');
 
-var config = {
-  fork: true,
-  modules: './modules'
-};
-
-var outpost = new Outpost(config);
+var outpost = new Outpost({fork: false});
 outpost.start(function() {
   var command1 = {
     type: 'install',
     args: {
-      package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.2.tgz',
-      script: '../../../../testInstall.js'
+      module: 'file:/Users/nfischer/capriza/outpost/testModule'
     }
   };
 
-  var command2 = {
-    type: 'install',
-    args: {
-      package: 'http://registry.npmjs.org/busmq/-/busmq-0.8.1.tgz',
-      script: '../../../../testInstallError.js'
-    }
-  };
+//  var command2 = {
+//    type: 'install',
+//    args: {
+//      module: 'http://registry.npmjs.org/busmq/-/busmq-0.8.1.tgz',
+////      script: '../../../../testInstallError.js'
+//    }
+//  };
 
-  outpost.process([command1, command2]);
+  outpost.process([command1], function() {
+    console.log('DONE!');
+  });
+
 });
 
