@@ -6,20 +6,17 @@ var outpost = new Outpost({fork: false});
 outpost.start(function() {
   var command1 = {
     type: 'install',
-    args: {
-      module: 'file:/Users/nfischer/capriza/outpost/testModule'
-    }
+    url: 'file:///Users/nfischer/capriza/outpost/testModule',
+    installParams: []
   };
 
-//  var command2 = {
-//    type: 'install',
-//    args: {
-//      module: 'http://registry.npmjs.org/busmq/-/busmq-0.8.1.tgz',
-////      script: '../../../../testInstallError.js'
-//    }
-//  };
+  var command2 = {
+    type: 'configure',
+    module: 'testmodule@0.1.0',
+    configParams: JSON.stringify({})
+  };
 
-  outpost.process([command1], function() {
+  outpost.process([command1, command2], function() {
     console.log('DONE!');
   });
 

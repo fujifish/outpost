@@ -13,7 +13,6 @@
   },
   "keywords": ["remote install"],
   "dependencies": {
-    "log" : "1.4.0",
     "proxying-agent": "0.1.6",
     "npm": "2.5.0"
   },
