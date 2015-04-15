@@ -2,7 +2,7 @@
 
 var Outpost = require('../lib/outpost');
 
-var outpost = new Outpost();
+var outpost = new Outpost({});
 outpost.start(function() {
   var command1 = {
     type: 'install',
@@ -13,7 +13,7 @@ outpost.start(function() {
   var command2 = {
     type: 'configure',
     module: 'testmodule@0.1.0',
-    configParams: ['--config', JSON.stringify({})]
+    configParams: ['--config', JSON.stringify({a: 1, b: 'hello'})]
   };
 
   outpost.process([command1, command2], function() {
