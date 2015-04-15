@@ -13,8 +13,9 @@
   },
   "keywords": ["remote install"],
   "dependencies": {
+    "npm": "2.5.0",
     "proxying-agent": "0.1.6",
-    "npm": "2.5.0"
+    "minimist": "1.1.1"
   },
   "devDependencies": {
     "should": "4.0.4",
