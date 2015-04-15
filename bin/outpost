@@ -16,7 +16,13 @@ outpost.start(function() {
     configParams: ['--config', JSON.stringify({a: 1, b: 'hello'})]
   };
 
-  outpost.process([command1, command2], function() {
+  var command3 = {
+    type: 'start',
+    module: 'testmodule@0.1.0',
+    startParams: ['--config', JSON.stringify({port: 8080})]
+  };
+
+  outpost.process([command1, command2, command3], function() {
     console.log('DONE!');
   });
 
