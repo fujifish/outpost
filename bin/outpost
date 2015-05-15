@@ -2,24 +2,34 @@
 
 var Outpost = require('../lib/outpost');
 
-var outpost = new Outpost({});
+var outpost = new Outpost({
+  registry: 'file:///Users/nfischer/capriza/outpost'
+});
+
 outpost.start(function() {
   var command1 = {
     type: 'install',
-    url: 'file:///Users/nfischer/capriza/outpost/testModule',
-    installParams: []
+//    module: 'testmodule@0.1.0',
+    url: 'file:///Users/nfischer/capriza/outpost/testmodule/0.1.0',
+    config: {}
   };
 
   var command2 = {
     type: 'configure',
     module: 'testmodule@0.1.0',
-    configParams: ['--config', JSON.stringify({a: 1, b: 'hello'})]
+    config: {
+      a: 1,
+      b: 'hello'
+    }
   };
 
   var command3 = {
     type: 'start',
     module: 'testmodule@0.1.0',
-    startParams: ['--config', JSON.stringify({port: 8080})]
+    config: {
+      port: 8080
+    }
+
   };
 
   outpost.process([command1, command2, command3], function() {

@@ -1,21 +1,22 @@
 {
   "name": "outpost",
-  "version": "0.1.0",
-  "description": "Remote installation and configuration system",
+  "version": "0.0.1",
+  "description": "Lightweight remote installation and configuration",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
-    "Nadav Fischer <nadav.fischer@capriza.com>"
+    "Nadav Fischer <nadav.fischer@capriza.com>",
+    "Yuval Carmel <yuval.carmel@capriza.com>"
   ],
   "homepage": "http://github.com/capriza/outpost",
   "repository" : { "type" : "git" , "url" : "http://github.com/capriza/outpost.git" },
   "bugs": {
     "url": "https://github.com/capriza/outpost/issues"
   },
-  "keywords": ["remote install"],
+  "keywords": ["remote","install","installation","deploy","monitor","configure","configuration"],
   "dependencies": {
     "npm": "2.5.0",
     "proxying-agent": "0.1.6",
-    "minimist": "1.1.1"
+    "forever": "0.14.1"
   },
   "devDependencies": {
     "should": "4.0.4",
