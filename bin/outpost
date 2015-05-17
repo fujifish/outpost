@@ -8,15 +8,15 @@ var outpost = new Outpost({
 
 outpost.start(function() {
   var command1 = {
-    type: 'install',
 //    module: 'testmodule@0.1.0',
+    type: 'install',
     url: 'file:///Users/nfischer/capriza/outpost/testmodule/0.1.0',
     config: {}
   };
 
   var command2 = {
-    type: 'configure',
     module: 'testmodule@0.1.0',
+    type: 'configure',
     config: {
       a: 1,
       b: 'hello'
@@ -24,15 +24,21 @@ outpost.start(function() {
   };
 
   var command3 = {
-    type: 'start',
     module: 'testmodule@0.1.0',
+    type: 'start',
     config: {
       port: 8080
     }
-
   };
 
-  outpost.process([command1, command2, command3], function() {
+  var command4 = {
+    module: 'testmodule@0.1.0',
+    type: 'stop'
+  };
+
+//  var commands = [command1, command2, command3];
+  var commands = [command4];
+  outpost.process(commands, function() {
     console.log('DONE!');
   });
 
