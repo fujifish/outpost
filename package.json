@@ -16,7 +16,7 @@
   "dependencies": {
     "npm": "2.5.0",
     "proxying-agent": "0.1.6",
-    "forever": "0.14.1"
+    "colors": "1.1.0"
   },
   "devDependencies": {
     "should": "4.0.4",

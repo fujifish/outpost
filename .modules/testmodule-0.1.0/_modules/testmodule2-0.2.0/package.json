@@ -1,0 +1,11 @@
+{
+  "name": "testmodule2",
+  "version": "0.2.0",
+  "outpost": {
+    "modules": [
+      "http://registry.npmjs.org/busmq/-/busmq-0.8.2.tgz"
+    ],
+    "scripts": {
+    }
+  }
+}
