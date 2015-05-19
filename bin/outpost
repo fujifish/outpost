@@ -37,7 +37,8 @@ outpost.start(function() {
   };
 
 //  var commands = [command1, command2, command3];
-  var commands = [command4];
+//  var commands = [command4];
+  var commands = [command4, command3];
   outpost.process(commands, function() {
     console.log('DONE!');
   });
