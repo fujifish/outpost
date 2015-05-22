@@ -1,47 +1,142 @@
-#!/usr/local/bin/node
+#!/usr/bin/env node
 
+var fs = require('fs');
+var path = require('path');
+var http = require('http');
 var Outpost = require('../lib/outpost');
+var command = require('../lib/cli').process();
 
-var outpost = new Outpost({
-  registry: 'file:///Users/nfischer/capriza/outpost'
-});
-
-outpost.start(function() {
-  var command1 = {
-//    module: 'testmodule@0.1.0',
-    type: 'install',
-    url: 'file:///Users/nfischer/capriza/outpost/testmodule/0.1.0',
-    config: {}
-  };
-
-  var command2 = {
-    module: 'testmodule@0.1.0',
-    type: 'configure',
-    config: {
-      a: 1,
-      b: 'hello'
+function _outpostConfig(config) {
+  config = config || 'config.json';
+  var conf = {};
+  try {
+    // either given a config as string or file name
+    if (config.trim().charAt(0) !== '{') {
+      config = fs.readFileSync(path.resolve(__dirname, '../' + config));
     }
-  };
+    conf = JSON.parse(config);
+  } catch (err) {
+    console.error('failed to load outpost config: ' + err.message);
+    process.exit(1);
+  }
+  return conf;
+}
 
-  var command3 = {
-    module: 'testmodule@0.1.0',
-    type: 'start',
-    config: {
-      port: 8080
+// special handling of starting outpost in daemon mode
+if (command.type === 'daemon') {
+  process.title = 'outpost-agent';
+  var config = _outpostConfig(command.config);
+  var outpost = new Outpost(config);
+  outpost.start(function(err) {
+    // notify the spawner that we're ready
+    if (process.send) {
+      process.send(err || 'ok');
+    } else {
+      console.log(err || 'agent started');
     }
-  };
-
-  var command4 = {
-    module: 'testmodule@0.1.0',
-    type: 'stop'
-  };
-
-  var commands = [command1, command2, command3];
-//  var commands = [command4];
-//  var commands = [command4, command3];
-  outpost.process(commands, function() {
-    console.log('DONE!');
   });
 
+  return;
+}
+
+// special handling of agent start command
+if (command.type === 'agent' && command.command === 'start') {
+  var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig || 'config.json'], {
+    cwd: path.resolve(__dirname, '..'),
+    env: process.env,
+    stdio:  ['ignore', 'ignore', 'ignore', 'ipc'],
+    detached: true
+  });
+
+  child.on('message', function(message) {
+    child.disconnect();
+    child.unref();
+    if (message === 'ok') {
+      console.log('agent started');
+      process.exit(0);
+    } else {
+      console.error(message);
+      process.exit(1);
+    }
+  });
+  return;
+}
+
+// all other commands are sent to the agent
+config = _outpostConfig(command.opConfig);
+delete command.opConfig;
+var postData = JSON.stringify(command);
+
+var requestOptions = {
+  hostname: '127.0.0.1',
+  port: (config && config.cliport) || Outpost.prototype.CLIPORT,
+  path: '/',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Content-Length': postData.length
+  }
+};
+
+var req = http.request(requestOptions, function(res) {
+  res.pipe(process.stdout);
+  res.on('end', function() {});
 });
+
+req.on('error', function(e) {
+  if (e.code === 'ECONNREFUSED') {
+    console.log('Outpost agent is not running. Run "outpost agent start" to start the agent.');
+  } else {
+    console.log('error communicating with the outpost agent: ' + e.message);
+  }
+});
+
+// write data to request body
+req.write(postData);
+req.end();
+
+//
+//var outpost = new Outpost({
+////  registry: 'file:///Users/nfischer/capriza/outpost'
+//});
+//
+//outpost.start(function() {
+////  var command1 = {
+////    type: 'install',
+////    url: 'file:///Users/nfischer/capriza/outpost/testmodule/0.1.0',
+////    config: {}
+////  };
+////
+////  var command2 = {
+////    module: 'testmodule@0.1.0',
+////    type: 'configure',
+////    config: {
+////      a: 1,
+////      b: 'hello'
+////    }
+////  };
+////
+////  var command3 = {
+////    module: 'testmodule@0.1.0',
+////    type: 'start',
+////    config: {
+////      port: 8080
+////    }
+////  };
+////
+////  var command4 = {
+////    module: 'testmodule@0.1.0',
+////    type: 'stop'
+////  };
+//
+////  var commands = [command1, command2, command3];
+////  var commands = [command4];
+////  var commands = [command4, command3];
+//
+//  var commands = [command];
+//
+//  outpost.process(commands, function() {
+//  });
+//
+//});
 
