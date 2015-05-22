@@ -4,8 +4,8 @@ var fs = require('fs');
 var path = require('path');
 var http = require('http');
 var Outpost = require('../lib/outpost');
-var command = require('../lib/cli').process();
 
+// load and parse the outpost configuration
 function _outpostConfig(config) {
   config = config || 'config.json';
   var conf = {};
@@ -21,6 +21,9 @@ function _outpostConfig(config) {
   }
   return conf;
 }
+
+// process command line options to get the command to execute
+var command = require('../lib/cli').process();
 
 // special handling of starting outpost in daemon mode
 if (command.type === 'daemon') {
