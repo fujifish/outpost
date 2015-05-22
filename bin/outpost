@@ -40,7 +40,7 @@ if (command.type === 'daemon') {
 }
 
 // special handling of agent start command
-if (command.type === 'agent' && command.command === 'start') {
+if (command.type === 'agent' && command.action === 'start') {
   var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig || 'config.json'], {
     cwd: path.resolve(__dirname, '..'),
     env: process.env,
