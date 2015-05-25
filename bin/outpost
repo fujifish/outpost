@@ -25,78 +25,104 @@ function _outpostConfig(config) {
 // process command line options to get the command to execute
 var command = require('../lib/cli').process();
 
-// special handling of starting outpost in daemon mode
-if (command.type === 'daemon') {
-  process.title = 'outpost-agent';
-  var config = _outpostConfig(command.config);
-  var outpost = new Outpost(config);
-  outpost.start(function(err) {
-    // notify the spawner that we're ready
-    if (process.send) {
-      process.send(err || 'ok');
-    } else {
-      console.log(err || 'agent started');
-    }
-  });
+function _handleCommand(command, cb) {
 
-  return;
-}
+  // special handling of starting outpost in daemon mode
+  if (command.type === 'daemon') {
+    process.title = 'outpost-agent';
+    var config = _outpostConfig(command.config);
+    var outpost = new Outpost(config);
+    outpost.start(function(err) {
+      // notify the spawner that we're ready
+      if (process.send) {
+        process.send(err || 'ok');
+      } else {
+        console.log(err || 'ok');
+      }
+    });
 
-// special handling of agent start command
-if (command.type === 'agent' && command.action === 'start') {
-  var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig || 'config.json'], {
-    cwd: path.resolve(__dirname, '..'),
-    env: process.env,
-    stdio:  ['ignore', 'ignore', 'ignore', 'ipc'],
-    detached: true
-  });
-
-  child.on('message', function(message) {
-    child.disconnect();
-    child.unref();
-    if (message === 'ok') {
-      console.log('agent started');
-      process.exit(0);
-    } else {
-      console.error(message);
-      process.exit(1);
-    }
-  });
-  return;
-}
-
-// all other commands are sent to the agent
-config = _outpostConfig(command.opConfig);
-delete command.opConfig;
-var postData = JSON.stringify(command);
-
-var requestOptions = {
-  hostname: '127.0.0.1',
-  port: (config && config.cliport) || Outpost.prototype.CLIPORT,
-  path: '/',
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Content-Length': postData.length
+    return;
   }
-};
 
-var req = http.request(requestOptions, function(res) {
-  res.pipe(process.stdout);
-  res.on('end', function() {});
-});
+  // special handling of agent restart command
+  if (command.type === 'agent' && command.action === 'restart') {
+    _handleCommand({type: 'agent', action: 'stop'}, function() {
+      _handleCommand({type: 'agent', action: 'start'}, function(err) {
+        cb && cb(err);
+      });
+    });
 
-req.on('error', function(e) {
-  if (e.code === 'ECONNREFUSED') {
-    console.log('Outpost agent is not running. Run "outpost agent start" to start the agent.');
-  } else {
-    console.log('error communicating with the outpost agent: ' + e.message);
+    return;
   }
-});
+
+  // special handling of agent start command
+  if (command.type === 'agent' && command.action === 'start') {
+    var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig || 'config.json'], {
+      cwd: path.resolve(__dirname, '..'),
+      env: process.env,
+      stdio:  ['ignore', 'ignore', 'ignore', 'ipc'],
+      detached: true
+    });
+
+    child.on('message', function(message) {
+      child.disconnect();
+      child.unref();
+      if (message === 'ok') {
+        console.log('agent started');
+        cb && cb();
+      } else {
+        console.error(message);
+        cb && cb(message);
+      }
+    });
+    return;
+  }
+
+  // all other commands are sent to the agent
+  config = _outpostConfig(command.opConfig);
+  delete command.opConfig;
+  var postData = JSON.stringify(command);
+
+  var requestOptions = {
+    hostname: '127.0.0.1',
+    port: (config && config.cliport) || Outpost.prototype.CLIPORT,
+    path: '/',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': postData.length
+    }
+  };
+
+  var req = http.request(requestOptions, function(res) {
+    res.pipe(process.stdout);
+    res.on('end', function() {
+      cb && cb();
+    });
+  });
+
+  req.on('error', function(e) {
+    if (e.code === 'ECONNREFUSED') {
+      console.log('Outpost agent is not running. Run "outpost agent start" to start the agent.');
+    } else {
+      console.log('error communicating with the outpost agent: ' + e.message);
+    }
+    cb && cb('error');
+  });
 
 // write data to request body
-req.write(postData);
-req.end();
+  req.write(postData);
+  req.end();
+
+}
+
+_handleCommand(command, function(err) {
+  if (err) {
+    process.exit(1);
+  }
+  process.exit(0);
+});
+
 
 //
 //var outpost = new Outpost({
