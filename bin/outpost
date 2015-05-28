@@ -39,6 +39,11 @@ function _handleCommand(command, cb) {
       } else {
         console.log(err || 'ok');
       }
+      if (err) {
+        process.nextTick(function() {
+          process.exit(1);
+        })
+      }
     });
 
     return;
@@ -46,7 +51,8 @@ function _handleCommand(command, cb) {
 
   // special handling of agent restart command
   if (command.type === 'agent' && command.action === 'restart') {
-    _handleCommand({type: 'agent', action: 'stop'}, function() {
+    _handleCommand({type: 'agent', action: 'stop', silent: true}, function() {
+      console.log('agent stopped');
       _handleCommand({type: 'agent', action: 'start'}, function(err) {
         cb && cb(err);
       });
@@ -95,22 +101,28 @@ function _handleCommand(command, cb) {
   };
 
   var req = http.request(requestOptions, function(res) {
-    res.pipe(process.stdout);
+    res.on('data', function(data) {
+      if (!command.silent) {
+        process.stdout.write(data);
+      }
+    });
     res.on('end', function() {
       cb && cb();
     });
   });
 
   req.on('error', function(e) {
-    if (e.code === 'ECONNREFUSED') {
-      console.log('Outpost agent is not running. Run "outpost agent start" to start the agent.');
-    } else {
-      console.log('error communicating with the outpost agent: ' + e.message);
+    if (!command.silent) {
+      if (e.code === 'ECONNREFUSED') {
+        console.log('Outpost agent is not running. Run "outpost agent start" to start the agent.');
+      } else {
+        console.log('error communicating with the outpost agent: ' + e.message);
+      }
     }
     cb && cb('error');
   });
 
-// write data to request body
+  // write data to request body
   req.write(postData);
   req.end();
 
