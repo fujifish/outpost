@@ -35,9 +35,9 @@ function _handleCommand(command, cb) {
     outpost.start(function(err) {
       // notify the spawner that we're ready
       if (process.send) {
-        process.send(err || 'ok');
+        process.send(err || 'agent started');
       } else {
-        console.log(err || 'ok');
+        console.log(err || 'agent started');
       }
       if (err) {
         process.nextTick(function() {
@@ -51,10 +51,12 @@ function _handleCommand(command, cb) {
 
   // special handling of agent restart command
   if (command.type === 'agent' && command.action === 'restart') {
-    _handleCommand({type: 'agent', action: 'stop', silent: true}, function() {
-      console.log('agent stopped');
-      _handleCommand({type: 'agent', action: 'start'}, function(err) {
-        cb && cb(err);
+    _handleCommand({type: 'agent', action: 'stop', silent: true}, function(err, message) {
+      if (message) {
+        console.log(message);
+      }
+      _handleCommand({type: 'agent', action: 'start'}, function(err, message) {
+        cb && cb(err, message);
       });
     });
 
@@ -73,15 +75,18 @@ function _handleCommand(command, cb) {
     child.on('message', function(message) {
       child.disconnect();
       child.unref();
-      if (message === 'ok') {
-        console.log('agent started');
-        cb && cb();
+      if (message === 'agent started') {
+        cb && cb(null, message);
       } else {
-        console.error(message);
         cb && cb(message);
       }
     });
     return;
+  }
+
+  // special handling of agent stop command
+  if (command.type === 'agent' && command.action === 'stop') {
+    command.silent = true;
   }
 
   // all other commands are sent to the agent
@@ -102,9 +107,7 @@ function _handleCommand(command, cb) {
 
   var req = http.request(requestOptions, function(res) {
     res.on('data', function(data) {
-      if (!command.silent) {
-        process.stdout.write(data);
-      }
+      process.stdout.write(data);
     });
     res.on('end', function() {
       cb && cb();
@@ -112,14 +115,15 @@ function _handleCommand(command, cb) {
   });
 
   req.on('error', function(e) {
-    if (!command.silent) {
-      if (e.code === 'ECONNREFUSED') {
-        console.log('Outpost agent is not running. Run "outpost agent start" to start the agent.');
-      } else {
-        console.log('error communicating with the outpost agent: ' + e.message);
-      }
+    var message;
+    var error = 'error';
+    if (e.code === 'ECONNREFUSED') {
+      error = null;
+      message = 'agent not running';
+    } else {
+      message = 'error communicating with the outpost agent: ' + e.message;
     }
-    cb && cb('error');
+    cb && cb(error, message);
   });
 
   // write data to request body
@@ -128,7 +132,11 @@ function _handleCommand(command, cb) {
 
 }
 
-_handleCommand(command, function(err) {
+_handleCommand(command, function(err, message) {
+  if (message) {
+    console.log((err ? (err + ': ') : '') + message);
+  }
+
   if (err) {
     process.exit(1);
   }
