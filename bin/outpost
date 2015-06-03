@@ -42,7 +42,7 @@ function _handleCommand(command, cb) {
       if (err) {
         process.nextTick(function() {
           process.exit(1);
-        })
+        });
       }
     });
 
@@ -75,7 +75,7 @@ function _handleCommand(command, cb) {
     child.on('message', function(message) {
       child.disconnect();
       child.unref();
-      if (message === 'agent started') {
+      if (message === 'agent started' || message === 'agent is already running') {
         cb && cb(null, message);
       } else {
         cb && cb(message);
