@@ -8,18 +8,29 @@
     "Yuval Carmel <yuval.carmel@capriza.com>"
   ],
   "homepage": "http://github.com/capriza/outpost",
-  "repository" : { "type" : "git" , "url" : "http://github.com/capriza/outpost.git" },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/capriza/outpost.git"
+  },
   "bugs": {
     "url": "https://github.com/capriza/outpost/issues"
   },
-  "keywords": ["remote","install","installation","deploy","monitor","configure","configuration"],
+  "keywords": [
+    "remote",
+    "install",
+    "installation",
+    "deploy",
+    "monitor",
+    "configure",
+    "configuration"
+  ],
   "dependencies": {
-    "npm": "2.5.0",
-    "proxying-agent": "0.1.6",
     "chalk": "1.0.0",
+    "fs-extra": "0.18.4",
     "minimist": "1.1.1",
     "mustache": "2.0.0",
-    "fs-extra": "0.18.4"
+    "proxying-agent": "0.1.6",
+    "tar-fs": "1.5.1"
   },
   "devDependencies": {
     "should": "4.0.4",
