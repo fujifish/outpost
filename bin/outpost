@@ -46,6 +46,10 @@ function _handleCommand(command, cb) {
       }
     });
 
+    outpost.on('close', function() {
+      process.exit(0);
+    });
+
     return;
   }
 
