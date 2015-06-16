@@ -55,44 +55,49 @@ function _handleCommand(command, cb) {
     return;
   }
 
-  // special handling of agent restart command
-  if (command.type === 'agent' && command.action === 'restart') {
-    _handleCommand({type: 'agent', action: 'stop', silent: true}, function(err, message) {
-      if (message) {
-        console.log(message);
-      }
-      _handleCommand({type: 'agent', action: 'start'}, function(err, message) {
-        cb && cb(err, message);
-      });
-    });
+  // special handling of agent commands
+  if (command.type === 'agent') {
+    switch (command.action) {
 
-    return;
-  }
+      case 'restart':
+        _handleCommand({type: 'agent', action: 'stop', silent: true}, function(err, message) {
+          if (message) {
+            console.log(message);
+          }
+          _handleCommand({type: 'agent', action: 'start'}, function(err, message) {
+            cb && cb(err, message);
+          });
+        });
 
-  // special handling of agent start command
-  if (command.type === 'agent' && command.action === 'start') {
-    var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig || 'config.json'], {
-      cwd: path.resolve(__dirname, '..'),
-      env: process.env,
-      stdio:  ['ignore', 'ignore', 'ignore', 'ipc'],
-      detached: true
-    });
+        return;
 
-    child.on('message', function(message) {
-      child.disconnect();
-      child.unref();
-      if (message === 'agent started' || message === 'agent is already running') {
-        cb && cb(null, message);
-      } else {
-        cb && cb(message);
-      }
-    });
-    return;
-  }
+      case 'start':
+        var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig || 'config.json'], {
+          cwd: path.resolve(__dirname, '..'),
+          env: process.env,
+          stdio:  ['ignore', 'ignore', 'ignore', 'ipc'],
+          detached: true
+        });
 
-  // special handling of agent stop command
-  if (command.type === 'agent' && command.action === 'stop') {
-    command.silent = true;
+        child.on('message', function(message) {
+          child.disconnect();
+          child.unref();
+          if (message === 'agent started' || message === 'agent is already running') {
+            cb && cb(null, message);
+          } else {
+            cb && cb(message);
+          }
+        });
+        return;
+
+      case 'version':
+        console.log(require('../package.json').version);
+        return;
+      case 'stop':
+      case 'update':
+        command.silent = true;
+        break;
+    }
   }
 
   // all other commands are sent to the agent
@@ -148,50 +153,4 @@ _handleCommand(command, function(err, message) {
   }
   process.exit(0);
 });
-
-
-//
-//var outpost = new Outpost({
-////  registry: 'file:///Users/nfischer/capriza/outpost'
-//});
-//
-//outpost.start(function() {
-////  var command1 = {
-////    type: 'install',
-////    url: 'file:///Users/nfischer/capriza/outpost/testmodule/0.1.0',
-////    config: {}
-////  };
-////
-////  var command2 = {
-////    module: 'testmodule@0.1.0',
-////    type: 'configure',
-////    config: {
-////      a: 1,
-////      b: 'hello'
-////    }
-////  };
-////
-////  var command3 = {
-////    module: 'testmodule@0.1.0',
-////    type: 'start',
-////    config: {
-////      port: 8080
-////    }
-////  };
-////
-////  var command4 = {
-////    module: 'testmodule@0.1.0',
-////    type: 'stop'
-////  };
-//
-////  var commands = [command1, command2, command3];
-////  var commands = [command4];
-////  var commands = [command4, command3];
-//
-//  var commands = [command];
-//
-//  outpost.process(commands, function() {
-//  });
-//
-//});
 
