@@ -28,6 +28,5 @@ node_modules
 .lock-wscript
 
 .idea
-.cache
-.monitor
-.modules
+test_modules
+config.json

@@ -90,11 +90,7 @@ function _handleCommand(command, cb) {
         });
         return;
 
-      case 'version':
-        console.log(require('../package.json').version);
-        return;
       case 'stop':
-      case 'update':
         command.silent = true;
         break;
     }
