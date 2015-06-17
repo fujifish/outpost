@@ -105,9 +105,10 @@ function _handleCommand(command, cb) {
         require('../lib/init-config').initConfig(defaults, function(result) {
           if (result) {
             // save the config
+            var output = command.options.output || path.resolve(process.cwd(), 'opconfig.json');
             try {
-              fs.writeFileSync(command.options.output, JSON.stringify(result, null, 2));
-              console.log('outpost configuration saved to ' + command.options.output);
+              fs.writeFileSync(output, JSON.stringify(result, null, 2));
+              console.log('outpost configuration saved to ' + output);
             } catch (err) {
               console.error('error writing configuration: ' + err.message);
               process.exit(1);
