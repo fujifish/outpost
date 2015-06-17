@@ -1,23 +1,55 @@
 #!/usr/bin/env node
 
+process.title = 'outpost-cli';
+
 var fs = require('fs');
+var util = require('util');
 var path = require('path');
 var http = require('http');
 var Outpost = require('../lib/outpost');
 
-// load and parse the outpost configuration
+/**
+ * try to find the outpost configuration file by traveling up the file system
+ * and checking every folder
+ */
+function _findOutpostConfig(dir) {
+  // reached the root
+  var parent = path.resolve(dir, '..');
+  if (parent === dir) {
+    return null;
+  }
+
+  try {
+    var file = path.resolve(dir, 'opconfig.json');
+    fs.openSync(file, 'r');
+    return file;
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return _findOutpostConfig(parent);
+    }
+    return null;
+  }
+}
+
+/**
+ *  load and parse the outpost configuration
+ */
 function _outpostConfig(config) {
-  config = config || 'config.json';
+  config = config || _findOutpostConfig(__dirname);
+  if (!config) {
+    return null;
+  }
+
   var conf = {};
   try {
     // either given a config as string or file name
     if (config.trim().charAt(0) !== '{') {
-      config = fs.readFileSync(path.resolve(__dirname, '../' + config));
+      config = fs.readFileSync(path.resolve(path.resolve(__dirname, '..'), config));
     }
     conf = JSON.parse(config);
   } catch (err) {
     console.error('failed to load outpost config: ' + err.message);
-    process.exit(1);
+    return null;
   }
   return conf;
 }
@@ -25,12 +57,19 @@ function _outpostConfig(config) {
 // process command line options to get the command to execute
 var command = require('../lib/cli').process();
 
+/**
+ * execute a command
+ */
 function _handleCommand(command, cb) {
 
   // special handling of starting outpost in daemon mode
   if (command.type === 'daemon') {
     process.title = 'outpost-agent';
-    var config = _outpostConfig(command.config);
+    var config = _outpostConfig(command.opConfig);
+    if (!config) {
+      console.error('outpost config not specified');
+      process.exit(1);
+    }
     var outpost = new Outpost(config);
     outpost.start(function(err) {
       // notify the spawner that we're ready
@@ -59,6 +98,23 @@ function _handleCommand(command, cb) {
   if (command.type === 'agent') {
     switch (command.action) {
 
+      case 'config':
+        var defaults = _outpostConfig(command.opConfig) || {};
+        defaults = util._extend(defaults, command.options);
+        require('../lib/init-config').initConfig(defaults, function(result) {
+          if (result) {
+            // save the config
+            try {
+              fs.writeFileSync(command.options.output, JSON.stringify(result, null, 2));
+              console.log('outpost configuration saved to ' + command.options.output);
+            } catch (err) {
+              console.error('error writing configuration: ' + err.message);
+              process.exit(1);
+            }
+          }
+        });
+        return;
+
       case 'restart':
         _handleCommand({type: 'agent', action: 'stop', silent: true}, function(err, message) {
           if (message) {
@@ -72,7 +128,7 @@ function _handleCommand(command, cb) {
         return;
 
       case 'start':
-        var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig || 'config.json'], {
+        var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig], {
           cwd: path.resolve(__dirname, '..'),
           env: process.env,
           stdio:  ['ignore', 'ignore', 'ignore', 'ipc'],
@@ -98,6 +154,10 @@ function _handleCommand(command, cb) {
 
   // all other commands are sent to the agent
   config = _outpostConfig(command.opConfig);
+  if (!config) {
+    console.error('outpost config not specified');
+    process.exit(1);
+  }
   delete command.opConfig;
   var postData = JSON.stringify(command);
 
@@ -139,6 +199,7 @@ function _handleCommand(command, cb) {
 
 }
 
+// start processing the command
 _handleCommand(command, function(err, message) {
   if (message) {
     console.log((err ? (err + ': ') : '') + message);

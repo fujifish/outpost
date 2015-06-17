@@ -29,17 +29,15 @@
     "fs-extra": "0.18.4",
     "minimist": "1.1.1",
     "mustache": "2.0.0",
+    "prompt": "^0.2.14",
     "proxying-agent": "0.1.6",
     "tar-fs": "1.5.1"
-  },
-  "devDependencies": {
-    "should": "4.0.4",
-    "mocha": "1.21.4"
   },
   "main": "index.js",
   "files": [
     "index.js",
-    "lib"
+    "lib",
+    "bin"
   ],
   "license": "MIT",
   "scripts": {
