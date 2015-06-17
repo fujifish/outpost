@@ -62,15 +62,16 @@ var command = require('../lib/cli').process();
  */
 function _handleCommand(command, cb) {
 
+  var opconfig = _outpostConfig(command.opConfig);
+
   // special handling of starting outpost in daemon mode
   if (command.type === 'daemon') {
     process.title = 'outpost-agent';
-    var config = _outpostConfig(command.opConfig);
-    if (!config) {
+    if (!opconfig) {
       console.error('outpost config not specified');
       process.exit(1);
     }
-    var outpost = new Outpost(config);
+    var outpost = new Outpost(opconfig);
     outpost.start(function(err) {
       // notify the spawner that we're ready
       if (process.send) {
@@ -98,8 +99,8 @@ function _handleCommand(command, cb) {
   if (command.type === 'agent') {
     switch (command.action) {
 
-      case 'config':
-        var defaults = _outpostConfig(command.opConfig) || {};
+      case 'init':
+        var defaults = opconfig || {};
         defaults = util._extend(defaults, command.options);
         require('../lib/init-config').initConfig(defaults, function(result) {
           if (result) {
@@ -115,6 +116,9 @@ function _handleCommand(command, cb) {
         });
         return;
 
+      case 'config':
+        console.log(JSON.stringify(opconfig, null, 2));
+        return;
       case 'restart':
         _handleCommand({type: 'agent', action: 'stop', silent: true}, function(err, message) {
           if (message) {
@@ -128,7 +132,12 @@ function _handleCommand(command, cb) {
         return;
 
       case 'start':
-        var child = require('child_process').spawn(process.execPath, [__filename, '--daemon', '--opconfig', command.opConfig], {
+        var args = [__filename, '--daemon'];
+        if (command.opConfig) {
+          args.push('--opconfig');
+          args.push(command.opConfig);
+        }
+        var child = require('child_process').spawn(process.execPath, args, {
           cwd: path.resolve(__dirname, '..'),
           env: process.env,
           stdio:  ['ignore', 'ignore', 'ignore', 'ipc'],
@@ -153,8 +162,7 @@ function _handleCommand(command, cb) {
   }
 
   // all other commands are sent to the agent
-  config = _outpostConfig(command.opConfig);
-  if (!config) {
+  if (!opconfig) {
     console.error('outpost config not specified');
     process.exit(1);
   }
@@ -163,7 +171,7 @@ function _handleCommand(command, cb) {
 
   var requestOptions = {
     hostname: '127.0.0.1',
-    port: (config && config.cliport) || Outpost.prototype.CLIPORT,
+    port: (opconfig && opconfig.cliport) || Outpost.prototype.CLIPORT,
     path: '/',
     method: 'POST',
     headers: {
