@@ -25,6 +25,7 @@
     "configuration"
   ],
   "dependencies": {
+    "ascii-table": "0.0.8",
     "chalk": "1.0.0",
     "fs-extra": "0.18.4",
     "logrotate-stream": "0.2.5",
