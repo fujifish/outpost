@@ -27,6 +27,7 @@
   "dependencies": {
     "chalk": "1.0.0",
     "fs-extra": "0.18.4",
+    "logrotate-stream": "0.2.5",
     "minimist": "1.1.1",
     "mustache": "2.0.0",
     "prompt": "git+https://github.com/capriza/prompt.git",
