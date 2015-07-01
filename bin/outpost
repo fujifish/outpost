@@ -7,6 +7,7 @@ var util = require('util');
 var path = require('path');
 var http = require('http');
 var Outpost = require('../lib/outpost');
+var Cache = require('../lib/cache');
 
 /**
  * try to find the outpost configuration file by traveling up the file system
@@ -68,8 +69,8 @@ function _handleCommand(command, cb) {
   if (command.type === 'daemon') {
     process.title = 'outpost-agent';
     if (!opconfig) {
-      console.error('outpost config not specified');
-      process.exit(1);
+      cb('error', 'outpost config not specified');
+      return;
     }
     var outpost = new Outpost(opconfig);
     outpost.start(function(err) {
@@ -88,10 +89,27 @@ function _handleCommand(command, cb) {
 
     outpost.on('close', function() {
       setImmediate(function() {
-        process.exit(0);
+        cb();
       });
     });
 
+    return;
+  }
+
+  // special handling of module commands
+  if (command.type === 'module') {
+    switch (command.action) {
+      case 'pack':
+        var cache = new Cache({});
+        cache.pack(command, function(err, filename) {
+          if (err) {
+            cb('module creation failed', err);
+          } else {
+            cb(null, 'module created at ' + filename);
+          }
+        });
+        break;
+    }
     return;
   }
 
@@ -108,10 +126,9 @@ function _handleCommand(command, cb) {
             var output = command.options.output || path.resolve(process.cwd(), 'opconfig.json');
             try {
               fs.writeFileSync(output, JSON.stringify(result, null, 2));
-              console.log('outpost configuration saved to ' + output);
+              cb(null, 'outpost configuration saved to ' + output);
             } catch (err) {
-              console.error('error writing configuration: ' + err.message);
-              process.exit(1);
+              cb('error', 'error writing configuration: ' + err.message);
             }
           }
         });
@@ -164,8 +181,8 @@ function _handleCommand(command, cb) {
 
   // all other commands are sent to the agent
   if (!opconfig) {
-    console.error('outpost config not specified');
-    process.exit(1);
+    cb('error', 'outpost config not specified');
+    return;
   }
   delete command.opConfig;
   var postData = JSON.stringify(command);

@@ -1,6 +1,6 @@
 {
   "name": "outpost",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Remote application installation, configuration and monitoring",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
@@ -33,7 +33,7 @@
     "mustache": "2.0.0",
     "prompt": "git+https://github.com/capriza/prompt.git",
     "proxying-agent": "0.1.6",
-    "tar-fs": "1.5.1"
+    "tar-fs": "1.7.0"
   },
   "main": "index.js",
   "files": [

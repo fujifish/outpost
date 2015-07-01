@@ -28,5 +28,6 @@ node_modules
 .lock-wscript
 
 .idea
+registry
 test_modules
 opconfig.json
