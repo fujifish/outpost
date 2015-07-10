@@ -27,6 +27,7 @@
   "dependencies": {
     "ascii-table": "0.0.8",
     "chalk": "1.0.0",
+    "ejs": "2.3.2",
     "fs-extra": "0.18.4",
     "logrotate-stream": "0.2.5",
     "minimist": "1.1.1",
@@ -41,8 +42,5 @@
     "lib",
     "bin"
   ],
-  "license": "MIT",
-  "scripts": {
-    "test": "mocha test"
-  }
+  "license": "MIT"
 }
