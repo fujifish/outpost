@@ -67,23 +67,42 @@ function _handleCommand(command, cb) {
 
   // special handling of starting outpost in daemon mode
   if (command.type === 'daemon') {
+
+    function _reportResult(result) {
+      if (process.send) {
+        process.send(result);
+      } else {
+        console.log(result);
+      }
+    }
+
     process.title = 'outpost-agent';
     if (!opconfig) {
-      cb('error', 'outpost config not specified');
+      _reportResult('outpost config not specified');
+      process.nextTick(function() { process.exit(1); });
       return;
     }
+
+    // make sure the config has an agent id
+    if (!opconfig.id || opconfig.id.length === 0) {
+      _reportResult('missing id in outpost config');
+      process.nextTick(function() { process.exit(1); });
+      return;
+    }
+
+    // make sure the config has an agent name
+    if (!opconfig.name || opconfig.name.length === 0) {
+      _reportResult('missing name in outpost config');
+      process.nextTick(function() { process.exit(1); });
+      return;
+    }
+
     var outpost = new Outpost(opconfig);
     outpost.start(function(err) {
       // notify the spawner that we're ready
-      if (process.send) {
-        process.send(err || 'agent started');
-      } else {
-        console.log(err || 'agent started');
-      }
+      _reportResult(err || 'agent started');
       if (err) {
-        process.nextTick(function() {
-          process.exit(1);
-        });
+        process.nextTick(function() { process.exit(1); });
       }
     });
 
@@ -150,6 +169,7 @@ function _handleCommand(command, cb) {
         return;
 
       case 'start':
+
         var args = [__filename, '--daemon'];
         if (command.opConfig) {
           args.push('--opconfig');
@@ -168,7 +188,7 @@ function _handleCommand(command, cb) {
           if (message === 'agent started' || message === 'agent is already running') {
             cb && cb(null, message);
           } else {
-            cb && cb(message);
+            cb && cb('error', message);
           }
         });
         return;
