@@ -88,11 +88,13 @@ Place the configuration file in the parent directory of `outpost-current` so tha
 locate it as well. See [Configuration] for details of the configuration file.
 
 ```
-outpost-current
- |- bin
- |- lib
- |- package.json
- |- node
+-<parent dir>
+  |-outpost-current
+  |  |- bin
+  |  |- lib
+  |  |- package.json
+  |  |- node
+  |-opconfig.json
 
 ```
 
@@ -138,7 +140,84 @@ file named `opconfig.json`.
 
 Stop outpost by running `bin/outpost agent stop`.
 
+## Outpost Modules
 
+Outpost manages modules. A module is a packaged set of executables, files and lifecycle scripts.
+The identity of a module consists of a name and a version, and the combination of the two uniquely identify the module.
+
+The full name of a module is unique, and has the form `<name>@<version>`.
+
+### Module Anatomy
+
+A module is a tar.gz file with a unique identity.
+
+The complete name of the module binary is `<name>-<version>[-<platform>].tar.gz`.
+`platform` is optional, and it distinguishes between different module distribution per platform.
+Supported platforms are `linux`, `darwin` and `win32`.
+
+A module must contain a `module.json` file in it's root, and it contains definitions about the module:
+
+* `name` [required] - the module name
+* `version` [required] - the module version
+* `scripts` [optional] - a list of lifecycle control scripts
+* `submodules` [optional] - an array of modules that this modules depends on
+* `schema` [optional] - a JSON schema describing the input fields that fortitude should display for configuring this module. This
+is never required, it simply helps to display the module configuration parameters in fortitude.
+
+Here is a complete module.json example of a redis module:
+
+```
+{
+  "name": "redis",
+  "version": "2.8.19",
+  "scripts": {
+    "configure": "configure.js",
+    "start": "start.js",
+    "stop": "stop.js"
+  },
+  "schema": {
+    "configure": {
+      "port": {"type": "integer", "title": "Redis Port", "default": 6379, "minimum": 1025, "maximum": 65535, "required": true}
+    }
+  }
+}
+
+```
+
+In this case, the full name of the module is `redis@2.8.19`.
+
+### Module Lifecycle
+
+A module lifecycle consists of the following phases:
+
+* `install` - installation of the module
+* `configure` - configuration of the module after it was installed
+* `start` - start the module after it was configured
+* `stop` - stop the module if it is started
+* `uninstall` - uninstall the module if it is installed
+
+A module contains a single script that outpost will run for every lifecycle phase. The script to run is defined in
+`module.json` under the `scripts` element.
+
+#### Install Phase
+
+The install phase is the first phase in the life of a module. Installing a module requires specifying the full name
+of the module
+
+```
+bin/outpost install <name>@<version>
+```
+
+When outpost installs a module, it performs the following steps. Outpost relies on the registry url and the
+root folder defined in the outpost configuration.
+
+* Search for the module binary in the registry. It first tries to download the version corresponding to the current
+platform, and if not found searches for the generic version.
+The path to the module being searched is `<registry url>/<name>/<name-version>/<name-version[-platform]>.tar.gz`
+* Download the module from the registry and save it to the `cache` folder (inside the root folder)
+* Unpack the module to the `modules` folder (inside the root folder)
+* Recursively download all submodules that are defined in the module.json file
+* Execute the install phase script of the downloaded module
 
 ## License
 
