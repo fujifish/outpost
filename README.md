@@ -18,7 +18,7 @@ machine where outpost is installed.
 ## Why?
 
 This whole thing may ring a bell to those familiar with
-"[Infrastructure Automation and Configuration Management](https://en.wikipedia.org/wiki/Comparison_of_open-source_configuration_management_software)"
+[infrastructure automation and configuration management](https://en.wikipedia.org/wiki/Comparison_of_open-source_configuration_management_software)"
 tools such as Puppet, Chef, SaltStack and Ansible.
 
 Outpost is different. It is not intended for automating the configuration and management of *infrastructure*.
@@ -45,14 +45,14 @@ An outpost agent must authenticate and authorize with fortitude to get things do
 have this restriction.
 
 Outpost is also designed to provide visibility into the application level of your cloud service.
-When you cloud services many customers, outpost and fortitude can be plugged-in to your application data to reflect
+When your cloud app provides services to many customers, outpost and fortitude can be plugged-in to your application data to reflect
 additional information about the outpost agent - such as which customer the specific outpost agent is servicing.
 
-## Installing
+## Outpost Installation
 
 Installing for testing and development is different than distributing to customers.
 
-### Testing and Development
+#### Testing and Development
 
 Outpost is a plain old node module, so installing it is done like any other node module:
 
@@ -60,7 +60,7 @@ Outpost is a plain old node module, so installing it is done like any other node
 node install outpost
 ```
 
-### Distribution
+#### Outpost Distribution
 
 When installing outpost on a customer infrastructure, there are some things we have to consider. For instance,
 we can't assume that the customer has network access to npm, or that node is even installed on the machine.
@@ -69,7 +69,7 @@ For that reason, it is usually necessary to pack outpost with the node executabl
 form such as a tar file. Place the node executable in the root folder of the outpost agent installation.
 
 ```
-- <install dir>
+<install dir>
  |- bin
  |- lib
  |- package.json
@@ -80,7 +80,7 @@ form such as a tar file. Place the node executable in the root folder of the out
 In addition, you'd probably want to add an upstart script for starting outpost on machine start up, but this
 is out of scope.
 
-#### Agent Self Update
+#### Outpost Self Update
 
 Outpost agent is capable of self-updating. Supporting outpost agent self-update requires that the outpost agent be
 installed in a directory named `outpost-current`, for example `/opt/outpost/outpost-current`.
@@ -88,7 +88,7 @@ Place the configuration file in the parent directory of `outpost-current` so tha
 locate it as well. See [Configuration] for details of the configuration file.
 
 ```
-- outpost-current
+outpost-current
  |- bin
  |- lib
  |- package.json
@@ -96,7 +96,7 @@ locate it as well. See [Configuration] for details of the configuration file.
 
 ```
 
-## Configuring
+## Outpost Configuration
 
 After installation it's necessary to configure outpost:
 
@@ -106,16 +106,16 @@ bin/outpost agent init
 
 This will launch an interactive series of questions to provide configuration parameters.
 
-* _Agent name_ (name) - The display name this agent will have in fortitude. It's just for display purposes.
-* _Root folder_ (root) - this is the directory that will hold the outpost data files. This should be *outside* the
-                  outpost installation directory
-* _Registry url_ (registry) - the url for the modules registry. Outpost downloads modules from this url when installing a module
-* _Fortitude url_ (fortitude) - this is the fortitude server url. Leave blank if outpost should be in standalone mode
-* _Fortitude authentication key_ (auth) - authentication key to identify outpost with fortitude. This would normally be different
+* Agent name (`name`) - The display name this agent will have in fortitude. It's just for display purposes.
+* Root folder (`root`) - this is the directory that will hold the outpost data files. This should be *outside* the
+outpost installation directory
+* Registry url (`registry`) - the url for the modules registry. Outpost downloads modules from this url when installing a module
+* Fortitude url (`fortitude`) - this is the fortitude server url. Leave blank if outpost should be in standalone mode
+* Fortitude authentication key (`auth`) - authentication key to identify outpost with fortitude. This would normally be different
 between customers
-* _Fortitude sync frequency_ (syncFrequency) - how often outpost should synchronize with fortitude (in seconds). 0 disables synchronization.
-* _Proxy url_ (proxy) - if outpost should go through a proxy for network access
-* _Internal CLI port_ (cliport) - the cli port outpost opens to allow control through the command line. No need to change the
+* Fortitude sync frequency (`syncFrequency`) - how often outpost should synchronize with fortitude (in seconds). 0 disables synchronization.
+* Proxy url (`proxy`) - if outpost should go through a proxy for network access
+* Internal CLI port (`cliport`) - the cli port outpost opens to allow control through the command line. No need to change the
 default unless there is a conflict with a different server running on the same machine.
 
 Selecting 'yes' to save the configuration will create an `opconfig.json` file in the current directory.
@@ -127,10 +127,16 @@ It's also possible to provide default values by specifying the configuration val
 bin/outpost agent init --name "Company X" --auth "very_secret_key_for_company_x"
 ```
 
-## Starting
+## Outpost Start
 
-Once configured, start outpost by running `bin/outpost agent start`. When starting, outpost searches for the configuration
-file by traversing the directories upwards until it finds a file named `opconfig.json`.
+Once configured, start outpost by running `bin/outpost agent start`.
+
+When starting, outpost searches for the configuration file by traversing the directories upwards until it finds a
+file named `opconfig.json`.
+
+## Outpost Stop
+
+Stop outpost by running `bin/outpost agent stop`.
 
 
 
