@@ -418,16 +418,16 @@ Mark the script as failed to complete. Not further actions are allowed after cal
 Register a process to be monitored by outpost. Outpost will start the process and continuously monitor that it is running.
 
 * `info` - the process information:
-** `name` - [required] the unique name of this monitored process used to identify this process in all later commands
-** `cmd` - the executable to execute. default is the node process that also started outpost
-** `args` - array of command line options to pass to the started process
-** `cwd` - the cwd for the process to monitor. default is the current module directory
-** `env` - an object of environment variables for the launched process. defaults to the outpost environment variables
-** `uid` - user id to use for the launched process. defaults to the outpost user id
-** `gid` - group id to use for the launched process. defaults to the outpost group id
-** `timeout` - time in seconds to wait for the process to actually start. defaults to 10 seconds
-** `logFile` - the log file for the the process stdout and stderr. defaults to the logsDir setting as specified in the outpost configuration
-** `pidFile` - a custom pid file that stores the process id to monitor. defaults to the process id of the process that is launched
+ * `name` - [required] the unique name of this monitored process used to identify this process in all later commands
+ * `cmd` - the executable to execute. default is the node process that also started outpost
+ * `args` - array of command line options to pass to the started process
+ * `cwd` - the cwd for the process to monitor. default is the current module directory
+ * `env` - an object of environment variables for the launched process. defaults to the outpost environment variables
+ * `uid` - user id to use for the launched process. defaults to the outpost user id
+ * `gid` - group id to use for the launched process. defaults to the outpost group id
+ * `timeout` - time in seconds to wait for the process to actually start. defaults to 10 seconds
+ * `logFile` - the log file for the the process stdout and stderr. defaults to the logsDir setting as specified in the outpost configuration
+* `pidFile` - a custom pid file that stores the process id to monitor. defaults to the process id of the process that is launched
 * `cb` - a callback to be invoked when the process has been launched. The callback receives an error if the process failed to launch
 
 ##### outpost.unmonitor(info, cb)
@@ -435,8 +435,8 @@ Register a process to be monitored by outpost. Outpost will start the process an
 Unregister a process to no longer be monitored by outpost. Outpost will stop the process and stop monitoring it.
 
 * `info` - the process information:
-** `name - [required] the unique name of this monitored process to unmonitor
-** `timeout - time in seconds to wait for the process to actually stop. defaults to 10 seconds
+ * `name - [required] the unique name of this monitored process to unmonitor
+ * `timeout - time in seconds to wait for the process to actually stop. defaults to 10 seconds
 * `cb` - a callback to be invoked when the process has been launched. The callback receives an error if the process failed to launch
 
 ##### outpost.script(module, config, cb)
@@ -464,12 +464,12 @@ that explicitly on the command line.
 
 * `cmd` - the command line to execute
 * `options` - options for the command:
-** `cwd` - the working directory to execute the command from
-** `timeout` - time to wait (in seconds) for the command to complete before it is forcefully terminated
+ * `cwd` - the working directory to execute the command from
+ * `timeout` - time to wait (in seconds) for the command to complete before it is forcefully terminated
 * `cb` - the command execution completion callback:
-** `code` - the exit code of the command
-** `signal` - if the command exited with an error because of timeout or some other signal
-** `output` - the console output (stderr and stdout merged)
+ * `code` - the exit code of the command
+ * `signal` - if the command exited with an error because of timeout or some other signal
+* `output` - the console output (stderr and stdout merged)
 
 ### Redis Module Example
 
