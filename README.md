@@ -50,7 +50,7 @@ additional information about the outpost agent - such as which customer the spec
 The outpost agent is responsible for performing the following:
 
 * Perform commands received from the command line
-* Periodically synchronize of the fortitude server
+* Periodically synchronize with the fortitude server
 * Monitor module processes and relaunch failed processes (similar to what [monit](https://mmonit.com/monit/) does)
 
 ### Agent Installation
@@ -263,14 +263,8 @@ corresponding scripts during the `configure`, `start` and `stop` phases.
 
 #### Install Phase
 
-The install phase is the first phase in the life of a module. Installing a module requires specifying the full name
-of the module:
-
-```
-bin/outpost install <name>@<version>
-```
-
-Outpost relies on the `registry` and the `root` folder defined in the outpost configuration for installing a module.
+The `install` phase is the first phase in the life of a module. Outpost relies on the `registry` and the `root` folder
+defined in the outpost configuration for installing a module.
 
 Outpost performs the following steps to install a module:
 
@@ -281,10 +275,25 @@ then outpost searches for the generic version.
 * Recursively download all submodules that are defined in the `module.json` file
 * Execute the `install` phase script of the downloaded module
 
+##### Command Line Install
+
+Installing a module requires specifying the full name of the module.
+
+```
+bin/outpost install <name>@<version>
+```
+
 #### Configure Phase
 
-The configure phase is the second phase in the life of a module. This phase is responsible for performing any and all
+The `configure` phase is the second phase in the life of a module. This phase is responsible for performing any and all
 configuration tasks of the installed module.
+
+Outpost performs the following steps to configure a module:
+
+* Search for the installed module in the `modules` directory (by full name or short name)
+* Execute the `configure` script of the module passing it the specified configuration
+
+##### Command Line Configure
 
 It is not required to specify the full name of the module. Specifying just the module name causes outpost to search for
 an installed module with that name, and if only one version is installed, it is selected as the module to configure.
@@ -299,10 +308,79 @@ bin/outpost configure <name>@<version> --config <configuration>
 bin/outpost configure <name> --config <configuration>
 ```
 
-Outpost performs the following steps to configure a module:
+#### Start Phase
+
+The `start` phase is the third phase in the life of a module. It is responsible for launching one or more processes
+and having the outpost agent monitor them.
+
+Outpost performs the following steps to start a module:
 
 * Search for the installed module in the `modules` directory (by full name or short name)
-* Execute the `configure` script of the module passing it the specified configuration
+* Execute the `start` script of the module
+
+##### Command Line Start
+
+It is not required to specify the full name of the module. Specifying just the module name causes outpost to search for
+an installed module with that name, and if only one version is installed, it is selected as the module to start.
+
+```
+# start using full module name
+bin/outpost start <name>@<version>
+
+# start using just the module name
+bin/outpost start <name>
+```
+
+#### Stop Phase
+
+The `stop` phase is responsible for stopping all of the processes that the `start` phase has created.
+
+Outpost performs the following steps to stop a module:
+
+* Search for the installed module in the `modules` directory (by full name or short name)
+* Execute the `stop` script of the module
+
+##### Command Line Stop
+
+It is not required to specify the full name of the module. Specifying just the module name causes outpost to search for
+an installed module with that name, and if only one version is installed, it is selected as the module to stop.
+
+```
+# stop using full module name
+bin/outpost stop <name>@<version>
+
+# stop using just the module name
+bin/outpost stop <name>
+```
+
+#### Uninstall Phase
+
+The `uninstall` phase is responsible for removing the module from the `modules` directory and
+stopping all module processes.
+
+The module package remains in the `cache` so that if the module is installed again, it will not be downloaded from the
+registry again.
+
+Outpost performs the following steps to uninstall a module:
+
+* Search for the installed module in the `modules` directory (by full name or short name)
+* Execute the `stop` script of the module
+* Delete the module directory from the `modules` directory
+
+##### Command Line Uninstall
+
+It is not required to specify the full name of the module. Specifying just the module name causes outpost to search for
+an installed module with that name, and if only one version is installed, it is selected as the module to uninstall.
+
+```
+# uninstall using full module name
+bin/outpost uninstall <name>@<version>
+
+# uninstall using just the module name
+bin/outpost uninstall <name>
+```
+
+## Module Scripts
 
 ## License
 
