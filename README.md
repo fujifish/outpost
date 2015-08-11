@@ -365,6 +365,7 @@ Outpost performs the following steps to uninstall a module:
 
 * Search for the installed module in the `modules` directory (by full name or short name)
 * Execute the `stop` script of the module
+* Execute the `uninstall` script of the module
 * Delete the module directory from the `modules` directory
 
 ##### Command Line Uninstall
@@ -380,7 +381,127 @@ bin/outpost uninstall <name>@<version>
 bin/outpost uninstall <name>
 ```
 
-## Module Scripts
+## Module Lifecycle Scripts
+
+Module lifecycle scripts are invoked by outpost during phase execution. A script is responsible for performing all the
+necessary tasks to complete the phase successfully. Not all modules require running a script in every phase.
+In most cases, the `configure`, `start` and `stop` phases will require a script.
+
+#### The `outpost` Object
+
+An object named `outpost` is available in the global scope of an executed script.
+The `outpost` object provides functions that are necessary to execute the script correctly as well as some
+utility functions to to ease their development.
+
+##### outpost.config
+
+The configuration object that is passed to the script during the execution of the phase.
+
+##### outpost.log(message)
+
+Log a message to the outpost log
+
+* `message` - the message to log
+
+##### outpost.done()
+
+Mark the script as completed successfully. Not further actions are allowed after calling `outpost.done()`.
+
+##### outpost.fail(message)
+
+Mark the script as failed to complete. Not further actions are allowed after calling `outpost.fail()`.
+
+* `message` - the failure message
+
+##### outpost.monitor(info, cb)
+
+Register a process to be monitored by outpost. Outpost will start the process and continuously monitor that it is running.
+
+* `info` - the process information:
+** `name` - [required] the unique name of this monitored process used to identify this process in all later commands
+** `cmd` - the executable to execute. default is the node process that also started outpost
+** `args` - array of command line options to pass to the started process
+** `cwd` - the cwd for the process to monitor. default is the current module directory
+** `env` - an object of environment variables for the launched process. defaults to the outpost environment variables
+** `uid` - user id to use for the launched process. defaults to the outpost user id
+** `gid` - group id to use for the launched process. defaults to the outpost group id
+** `timeout` - time in seconds to wait for the process to actually start. defaults to 10 seconds
+** `logFile` - the log file for the the process stdout and stderr. defaults to the logsDir setting as specified in the outpost configuration
+** `pidFile` - a custom pid file that stores the process id to monitor. defaults to the process id of the process that is launched
+* `cb` - a callback to be invoked when the process has been launched. The callback receives an error if the process failed to launch
+
+##### outpost.unmonitor(info, cb)
+
+Unregister a process to no longer be monitored by outpost. Outpost will stop the process and stop monitoring it.
+
+* `info` - the process information:
+** `name - [required] the unique name of this monitored process to unmonitor
+** `timeout - time in seconds to wait for the process to actually stop. defaults to 10 seconds
+* `cb` - a callback to be invoked when the process has been launched. The callback receives an error if the process failed to launch
+
+##### outpost.script(module, config, cb)
+
+Run a script of a submodule. The script that will run is of the same lifecycle phase as the current script.
+
+* `module` - the module name whose script is to be run
+* `config` - the configuration to pass to the executed script
+* `cb` - invoked when the script is done. receives an error if the script failed.
+
+##### outpost.template(template, context, output, cb)
+
+Render a template. Templates are processed as [Mustache](http://mustache.github.io/mustache.5.html) or
+as [EJS](http://ejs.co/) templates. If the input file name ends with `.ejs` then the EJS template engine is used.
+In all other cases the Mustache template engine is used.
+
+* `template` - input template. may be a file name or the complete template string
+* `context` - the context object for rendering the template
+* `output` - the output file to contain to template processing result
+
+##### outpost.exec(cmd, options, cb)
+
+Execute a command line. `stderr` is automatically redirected to `stdout` so there is no need to specify
+that explicitly on the command line.
+
+* `cmd` - the command line to execute
+* `options` - options for the command:
+** `cwd` - the working directory to execute the command from
+** `timeout` - time to wait (in seconds) for the command to complete before it is forcefully terminated
+* `cb` - the command execution completion callback:
+** `code` - the exit code of the command
+** `signal` - if the command exited with an error because of timeout or some other signal
+** `output` - the console output (stderr and stdout merged)
+
+### Redis Module Example
+
+Examples are easy to understand, so let's go through a complete example of a redis module.
+
+##### Redis Module Contents
+
+```
+|-config.json.tpl
+|-configure.js
+|-module.json
+|-start.js
+|-stop.js
+|-redis-server
+
+```
+
+##### Redis Configure Script
+
+```javascript
+outpost.config.port = outpost.config.port || 6379;
+outpost.template('config.json.tpl', outpost.config, 'config.json', function(err) {
+  if (err) {
+    outpost.fail(err);
+  } else {
+    outpost.done();
+  }
+});
+```
+
+The configure script generates a file containing the port that the redis server should accept connections on.
+The module package also contains a file named
 
 ## License
 
