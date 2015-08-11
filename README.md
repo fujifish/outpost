@@ -3,17 +3,14 @@
 Outpost is a remote module installation, management and monitoring agent. When outpost is installed on a machine,
 it is capable of installing, configuring, starting, stopping and monitoring various modules.
 
-An outpost module is just a fancy name for a container of executables, files and control scripts. The control scripts are used
-by outpost to manage the lifecycle of a module.
-
 When we say *remote management*, we mean that the main use case for using outpost is managing outpost modules lifecycle
 through [fortitude](https://github.com/capriza/fortitude), which is the outpost server.
-Fortitude provides complete visibility into all running outpost agents,
-the modules every outpost is managing and their state. It provides the ability to centrally and remotely
-control the lifecycle and state of every module.
 
-Outpost can also be used standalone without fortitude, controlling it through the command line directly on the
-machine where outpost is installed.
+[Fortitude](https://github.com/capriza/fortitude) provides complete visibility into all running outpost agents,
+the modules that every outpost is managing and the outpost agent state. It provides the ability to centrally and remotely
+control the lifecycle and state of every module in every agent.
+
+Outpost can also be controlled from the command line directly on the machine where outpost is installed.
 
 ## Why?
 
@@ -48,11 +45,19 @@ Outpost is also designed to provide visibility into the application level of you
 When your cloud app provides services to many customers, outpost and fortitude can be plugged-in to your application data to reflect
 additional information about the outpost agent - such as which customer the specific outpost agent is servicing.
 
-## Outpost Installation
+## Outpost Agent
+
+The outpost agent is responsible for performing the following:
+
+* Perform commands received from the command line
+* Periodically synchronize of the fortitude server
+* Monitor module processes and relaunch failed processes (similar to what [monit](https://mmonit.com/monit/) does)
+
+### Agent Installation
 
 Installing for testing and development is different than distributing to customers.
 
-#### Testing and Development
+#### Testing and Development Environments
 
 Outpost is a plain old node module, so installing it is done like any other node module:
 
@@ -60,7 +65,7 @@ Outpost is a plain old node module, so installing it is done like any other node
 node install outpost
 ```
 
-#### Outpost Distribution
+#### Production Environments and Distribution
 
 When installing outpost on a customer infrastructure, there are some things we have to consider. For instance,
 we can't assume that the customer has network access to npm, or that node is even installed on the machine.
@@ -78,9 +83,9 @@ form such as a tar file. Place the node executable in the root folder of the out
 ```
 
 In addition, you'd probably want to add an upstart script for starting outpost on machine start up, but this
-is out of scope.
+is out of scope of this documentation.
 
-#### Outpost Self Update
+#### Self Update
 
 Outpost agent is capable of self-updating. Supporting outpost agent self-update requires that the outpost agent be
 installed in a directory named `outpost-current`, for example `/opt/outpost/outpost-current`.
@@ -98,9 +103,31 @@ locate it as well. See [Configuration] for details of the configuration file.
 
 ```
 
-## Outpost Configuration
+### Agent Configuration
 
-After installation it's necessary to configure outpost:
+Outpost configuration is maintained in a file named `opconfig.json`. Outpost locates this file by traversing the
+directories upwards until it finds the file, so placing it in the parent directory of the outpost installation is the
+preferred location.
+
+#### Configuration Fields
+
+* `name` - Agent name - the display name this agent will have in fortitude. It's just for display purposes.
+* `root` - Root folder - this is the directory that will hold the outpost data files. This should be *outside* the
+outpost installation directory
+* `registry` - Registry url - the url for the modules registry. Outpost downloads modules from this url when installing a module
+* `fortitude` - Fortitude url - this is the fortitude server url. Leave blank if outpost should be in standalone mode
+* `auth` - Fortitude authentication key - authentication key to identify outpost with fortitude. This would normally be different
+between customers
+* `syncFrequency` - Fortitude sync frequency - how often outpost should synchronize with fortitude (in seconds).
+0 disables synchronization completely.
+* `proxy` - Proxy url - if outpost should go through a proxy for network access
+* `cliport` - Internal CLI port - the cli port outpost opens to allow control through the command line. No need to change the
+default unless there is a conflict with a different server running on the same machine.
+* `id` - the unique identity of this agent
+
+#### Interactive Configuration
+
+It's possible to interactively configure outpost by running:
 
 ```
 bin/outpost agent init
@@ -108,20 +135,9 @@ bin/outpost agent init
 
 This will launch an interactive series of questions to provide configuration parameters.
 
-* Agent name (`name`) - The display name this agent will have in fortitude. It's just for display purposes.
-* Root folder (`root`) - this is the directory that will hold the outpost data files. This should be *outside* the
-outpost installation directory
-* Registry url (`registry`) - the url for the modules registry. Outpost downloads modules from this url when installing a module
-* Fortitude url (`fortitude`) - this is the fortitude server url. Leave blank if outpost should be in standalone mode
-* Fortitude authentication key (`auth`) - authentication key to identify outpost with fortitude. This would normally be different
-between customers
-* Fortitude sync frequency (`syncFrequency`) - how often outpost should synchronize with fortitude (in seconds). 0 disables synchronization.
-* Proxy url (`proxy`) - if outpost should go through a proxy for network access
-* Internal CLI port (`cliport`) - the cli port outpost opens to allow control through the command line. No need to change the
-default unless there is a conflict with a different server running on the same machine.
-
-Selecting 'yes' to save the configuration will create an `opconfig.json` file in the current directory.
-To save the opconfig.json file elsewhere, add the `--output <location>` flag to the agent init command.
+After all fields have been filled, selecting 'yes' to save the configuration will create an `opconfig.json`
+file in the current directory. To save the opconfig.json file elsewhere, add the `--output <location>` flag
+to the agent init command.
 
 It's also possible to provide default values by specifying the configuration value on the command line:
 
@@ -129,20 +145,31 @@ It's also possible to provide default values by specifying the configuration val
 bin/outpost agent init --name "Company X" --auth "very_secret_key_for_company_x"
 ```
 
-## Outpost Start
+### Agent Start
 
-Once configured, start outpost by running `bin/outpost agent start`.
+To start outpost, run:
 
-When starting, outpost searches for the configuration file by traversing the directories upwards until it finds a
-file named `opconfig.json`.
+```
+bin/outpost agent start
+```
 
-## Outpost Stop
+This will launch the outpost agent in daemon mode.
 
-Stop outpost by running `bin/outpost agent stop`.
+### Agent Stop
 
-## Outpost Modules
+To start outpost, run:
 
-Outpost manages modules. A module is a packaged set of executables, files and lifecycle scripts.
+```
+bin/outpost agent stop
+```
+
+This will stop the outpost agent.
+
+## Modules
+
+An outpost module is a container of executables, files and control scripts. The control scripts are used
+by outpost to manage the lifecycle of a module.
+
 The identity of a module consists of a name and a version, and the combination of the two uniquely identify the module.
 
 The full name of a module is unique, and has the form `<name>@<version>`.
@@ -170,6 +197,7 @@ Here is a complete module.json example of a redis module:
 {
   "name": "redis",
   "version": "2.8.19",
+  "submodules": [],
   "scripts": {
     "configure": "configure.js",
     "start": "start.js",
@@ -186,6 +214,27 @@ Here is a complete module.json example of a redis module:
 
 In this case, the full name of the module is `redis@2.8.19`.
 
+### Modules Registry
+
+Modules are hosted in *modules registry*. The registry is a static file http server that outpost contacts
+to download modules. It can even be an [AWS S3 bucket](https://aws.amazon.com/s3/).
+
+The path to a module inside the registry is `<registry url>/<name>/<name-version>/<name-version[-platform]>.tar.gz`.
+
+For example:
+
+```
+<registry>
+  |- redis
+  |  |- redis-2.8.19
+  |  |  |- redis-2.8.19-linux.tar.gz
+  |  |  |- redis-2.8.19-darwin.tar.gz
+  |- logrotate
+  |  |- logrotate-3.9.0
+  |  |  |- logrotate-3.9.0-linux.tar.gz
+  |  |  |- logrotate-3.9.0-darwin.tar.gz
+```
+
 ### Module Lifecycle
 
 A module lifecycle consists of the following phases:
@@ -196,28 +245,64 @@ A module lifecycle consists of the following phases:
 * `stop` - stop the module if it is started
 * `uninstall` - uninstall the module if it is installed
 
-A module contains a single script that outpost will run for every lifecycle phase. The script to run is defined in
-`module.json` under the `scripts` element.
+A module contains a single script that outpost will run for every lifecycle phase.
+The script to run is defined in `module.json` under the `scripts` element. Specifying a lifecycle script is completely
+optional:
+
+```
+"scripts": {
+  "configure": "configure.js",
+  "start": "start.js",
+  "stop": "stop.js",
+}
+
+```
+
+In this example, no script will run during the `install` and `uninstall` phases, but outpost will execute the
+corresponding scripts during the `configure`, `start` and `stop` phases.
 
 #### Install Phase
 
 The install phase is the first phase in the life of a module. Installing a module requires specifying the full name
-of the module
+of the module:
 
 ```
 bin/outpost install <name>@<version>
 ```
 
-When outpost installs a module, it performs the following steps. Outpost relies on the registry url and the
-root folder defined in the outpost configuration.
+Outpost relies on the `registry` and the `root` folder defined in the outpost configuration for installing a module.
 
-* Search for the module binary in the registry. It first tries to download the version corresponding to the current
-platform, and if not found searches for the generic version.
-The path to the module being searched is `<registry url>/<name>/<name-version>/<name-version[-platform]>.tar.gz`
+Outpost performs the following steps to install a module:
+
+* Search for the module package in the registry. It first tries platform specific package, and if it's not found
+then outpost searches for the generic version.
 * Download the module from the registry and save it to the `cache` folder (inside the root folder)
 * Unpack the module to the `modules` folder (inside the root folder)
-* Recursively download all submodules that are defined in the module.json file
-* Execute the install phase script of the downloaded module
+* Recursively download all submodules that are defined in the `module.json` file
+* Execute the `install` phase script of the downloaded module
+
+#### Configure Phase
+
+The configure phase is the second phase in the life of a module. This phase is responsible for performing any and all
+configuration tasks of the installed module.
+
+It is not required to specify the full name of the module. Specifying just the module name causes outpost to search for
+an installed module with that name, and if only one version is installed, it is selected as the module to configure.
+
+The configuration itself can either be a path to a file containing the configuration, or a complete JSON string.
+
+```
+# configure using full module name
+bin/outpost configure <name>@<version> --config <configuration>
+
+# configure using just the module name
+bin/outpost configure <name> --config <configuration>
+```
+
+Outpost performs the following steps to configure a module:
+
+* Search for the installed module in the `modules` directory (by full name or short name)
+* Execute the `configure` script of the module passing it the specified configuration
 
 ## License
 
