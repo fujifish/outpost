@@ -245,9 +245,8 @@ A module lifecycle consists of the following phases:
 * `stop` - stop the module if it is started
 * `uninstall` - uninstall the module if it is installed
 
-A module contains a single script that outpost will run for every lifecycle phase.
-The script to run is defined in `module.json` under the `scripts` element. Specifying a lifecycle script is completely
-optional:
+A module can specify a script to run in every lifecycle phase.
+The script to run is defined in `module.json` under the `scripts` element.
 
 ```
 "scripts": {
@@ -272,7 +271,7 @@ Outpost performs the following steps to install a module:
 then outpost searches for the generic version.
 * Download the module from the registry and save it to the `cache` folder (inside the root folder)
 * Unpack the module to the `modules` folder (inside the root folder)
-* Recursively download all submodules that are defined in the `module.json` file
+* Recursively install all submodules that are defined in the `module.json` file
 * Execute the `install` phase script of the downloaded module
 
 ##### Command Line Install
@@ -471,9 +470,11 @@ that explicitly on the command line.
  * `signal` - if the command exited with an error because of timeout or some other signal
 * `output` - the console output (stderr and stdout merged)
 
-### Redis Module Example
+## Module Example
 
-Examples are easy to understand, so let's go through a complete example of a redis module.
+To best explain how to create a module, we'll go through a simple example [Redis](http://redis.io) module.
+
+Once installed and configured, this module starts a redis-server on a configurable port.
 
 ##### Redis Module Contents
 
@@ -487,21 +488,116 @@ Examples are easy to understand, so let's go through a complete example of a red
 
 ```
 
+##### Redis `module.json`
+```javascript
+{
+  "name": "redis",
+  "version": "2.8.19",
+  "scripts": {
+    "configure": "configure.js",
+    "start": "start.js",
+    "stop": "stop.js"
+  }
+}
+```
+
 ##### Redis Configure Script
 
 ```javascript
-outpost.config.port = outpost.config.port || 6379;
+// print to the outpost log
+outpost.log('redis configure script started');
+
+// generate a file from a template
 outpost.template('config.json.tpl', outpost.config, 'config.json', function(err) {
   if (err) {
+    // it failed, fail the script
     outpost.fail(err);
   } else {
+    // it worked!
+    outpost.log('redis configuration script is done!');
     outpost.done();
   }
 });
 ```
 
-The configure script generates a file containing the port that the redis server should accept connections on.
-The module package also contains a file named
+The `configure.js` script generates a file containing the port that the redis server should accept connections on.
+This is done using the `outpost.template()` function that generates the config file from a template file.
+
+The template file `config.json.tpl` contains:
+
+```javascript
+{"port": {{serverPort}}}
+```
+
+Running the `configure` phase with a configuration of:
+
+```javascript
+{"serverPort": 5678}
+```
+
+generates the file `config.json` that ends up containing:
+
+```javascript
+{"port": 5678}
+```
+
+The last thing the `configure.js` does is call `outpost.done()` to specify the successful completion of the script.
+
+##### Redis Start Script
+
+```javascript
+// print to the outpost log
+outpost.log('redis start script started');
+
+// load the configuration file that was generated in the configure phase
+var config = require('./config.json');
+
+outpost.log('starting redis on port ' + config.port);
+
+// register the redis-server process with the outpost process monitor
+outpost.monitor({name: 'redis', cmd: './redis-server', args: ['--port', config.port]}, function(err) {
+  if (err) {
+    outpost.fail('redis failed to start: ' + err);
+  } else {
+    outpost.log('redis server started!');
+    outpost.done();
+  }
+});
+```
+
+The `start.js` script loads the configuration file that was generated during the `configure` phase
+and registers a process with the outpost process monitor service so that it will launch it and continuously
+monitor that it running.
+
+The last thing the `start.js` script does is call `outpost.done()` to specify the successful completion of the script.
+
+##### Redis Stop Script
+
+```javascript
+// print to the outpost log
+outpost.log('redis stop script started');
+
+// remove the redis process from the outpost monitoring service.
+outpost.unmonitor({name: 'redis'}, function(err) {
+  if (err) {
+    outpost.fail('redis failed to stop: ' + err);
+  } else {
+    outpost.log('redis server stopped!');
+    outpost.done();
+  }
+});
+```
+
+The `stop.js` script unregisters the 'redis' process from the outpost process monitor service. This will automatically
+kill stop the process.
+
+The last thing the `stop.js` script does is call `outpost.done()` to specify the successful completion of the script.
+
+## Submodules
+
+A module may depend on other modules for added functionality.
+
+
 
 ## License
 
