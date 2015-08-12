@@ -434,8 +434,8 @@ Register a process to be monitored by outpost. Outpost will start the process an
 Unregister a process to no longer be monitored by outpost. Outpost will stop the process and stop monitoring it.
 
 * `info` - the process information:
- * `name - [required] the unique name of this monitored process to unmonitor
- * `timeout - time in seconds to wait for the process to actually stop. defaults to 10 seconds
+ * `name` - [required] the unique name of this monitored process to unmonitor
+ * `timeout` - time in seconds to wait for the process to actually stop. defaults to 10 seconds
 * `cb` - a callback to be invoked when the process has been launched. The callback receives an error if the process failed to launch
 
 ##### outpost.script(module, config, cb)
@@ -606,7 +606,7 @@ of submodules in the correct order.
 
 #### Submodule Lifecycle Scripts
 
-A module script can execute a script of a submodule by using the `[outpost.script(module, config, cb)]` function,
+A module script can execute a script of a submodule by using the `outpost.script()` function,
 however it is restricted to running the _same lifecycle_ script only.
 This means that the `configure` script cannot execute the `start` script of a submodule,
 only the `configure` script can be executed.
