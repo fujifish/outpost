@@ -1,4 +1,4 @@
-# Outpost
+![outpost logo](/outpost.png)
 
 Outpost is a remote module installation, management and monitoring agent. When outpost is installed on a machine,
 it is capable of installing, configuring, starting, stopping and monitoring various modules.
@@ -436,7 +436,7 @@ Unregister a process to no longer be monitored by outpost. Outpost will stop the
 * `info` - the process information:
  * `name` - [required] the unique name of this monitored process to unmonitor
  * `timeout` - time in seconds to wait for the process to actually stop. defaults to 10 seconds
-* `cb` - a callback to be invoked when the process has been launched. The callback receives an error if the process failed to launch
+* `cb` - a callback to be invoked when the process has been stopped. The callback receives an error if the process failed to stop
 
 ##### outpost.script(module, config, cb)
 
