@@ -270,7 +270,7 @@ Outpost performs the following steps to install a module:
 * Search for the module package in the registry. It first tries platform specific package, and if it's not found
 then outpost searches for the generic version.
 * Download the module from the registry and save it to the `cache` folder (inside the root folder)
-* Unpack the module to the `modules` folder (inside the root folder)
+* Unpack the module into the `modules` folder (inside the root folder)
 * Recursively install all submodules that are defined in the `module.json` file
 * Execute the `install` phase script of the downloaded module
 
@@ -476,7 +476,7 @@ To best explain how to create a module, we'll go through a simple example [Redis
 
 Once installed and configured, this module starts a redis-server on a configurable port.
 
-##### Redis Module Contents
+#### Redis Module Contents
 
 ```
 |-config.json.tpl
@@ -488,7 +488,7 @@ Once installed and configured, this module starts a redis-server on a configurab
 
 ```
 
-##### Redis `module.json`
+#### Redis `module.json`
 ```javascript
 {
   "name": "redis",
@@ -501,7 +501,7 @@ Once installed and configured, this module starts a redis-server on a configurab
 }
 ```
 
-##### Redis Configure Script
+#### Redis Configure Script
 
 ```javascript
 // print to the outpost log
@@ -543,7 +543,7 @@ generates the file `config.json` that ends up containing:
 
 The last thing the `configure.js` does is call `outpost.done()` to specify the successful completion of the script.
 
-##### Redis Start Script
+#### Redis Start Script
 
 ```javascript
 // print to the outpost log
@@ -571,7 +571,7 @@ monitor that it running.
 
 The last thing the `start.js` script does is call `outpost.done()` to specify the successful completion of the script.
 
-##### Redis Stop Script
+#### Redis Stop Script
 
 ```javascript
 // print to the outpost log
@@ -595,9 +595,21 @@ The last thing the `stop.js` script does is call `outpost.done()` to specify the
 
 ## Submodules
 
-A module may depend on other modules for added functionality.
+A module may depend on other modules for added functionality. These modules are children of the module
+that declared the use of them, hence they are _submodules_.
 
+Submodules of a module are accessible to that module only; they are not shared between modules.
 
+Outpost automatically downloads and unpacks submodules when installing a module, but it _does not_ automatically
+execute the lifecycle phase script of the submodules. It is a module's responsibility to execute the lifecycle scripts
+of submodules in the correct order.
+
+#### Submodule Lifecycle Scripts
+
+A module script can execute a script of a submodule by using the `[outpost.script(module, config, cb)]` function,
+however it is restricted to running the _same lifecycle_ script only.
+This means that the `configure` script cannot execute the `start` script of a submodule,
+only the `configure` script can be executed.
 
 ## License
 
