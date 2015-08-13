@@ -1,4 +1,4 @@
-->![outpost logo](/outpost.png)<-
+![outpost logo](/outpost.png)
 
 Outpost is a remote module installation, management and monitoring agent. When outpost is installed on a machine,
 it is capable of installing, configuring, starting, stopping and monitoring various modules.
