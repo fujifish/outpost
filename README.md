@@ -45,13 +45,13 @@ Outpost is also designed to provide visibility into the application level of you
 When your cloud app provides services to many customers, outpost and fortitude can be plugged-in to your application data to reflect
 additional information about the outpost agent - such as which customer the specific outpost agent is servicing.
 
-## Outpost Agent
+# Outpost Agent
 
 The outpost agent is responsible for performing the following:
 
 * Perform commands received from the command line
 * Periodically synchronize with the fortitude server
-* Monitor module processes and relaunch failed processes (similar to what [monit](https://mmonit.com/monit/) does)
+* Monitor module processes and relaunch failed processes (similar to what [forever](https://github.com/foreverjs/forever) does)
 
 ### Agent Installation
 
@@ -84,24 +84,6 @@ form such as a tar file. Place the node executable in the root folder of the out
 
 In addition, you'd probably want to add an upstart script for starting outpost on machine start up, but this
 is out of scope of this documentation.
-
-#### Self Update
-
-Outpost agent is capable of self-updating. Supporting outpost agent self-update requires that the outpost agent be
-installed in a directory named `outpost-current`, for example `/opt/outpost/outpost-current`.
-Place the configuration file in the parent directory of `outpost-current` so that the updated version of outpost will
-locate it as well. See [Configuration] for details of the configuration file.
-
-```
--<parent dir>
-  |-outpost-current
-  |  |- bin
-  |  |- lib
-  |  |- package.json
-  |  |- node
-  |-opconfig.json
-
-```
 
 ### Agent Configuration
 
@@ -165,7 +147,74 @@ bin/outpost agent stop
 
 This will stop the outpost agent.
 
-## Modules
+### Agent Synchronize
+
+Outpost synchronizes with the fortitude server periodically by sending it update status information and retrieving
+commands to execute. The `syncFrequency` configuration field specifies how often outpost will contact fortitude.
+
+When synchronizing with fortitude, outpost first sends the following information:
+
+* general information about the agent (platform, agent version, node version, etc.)
+* currently installed modules, their configuration and their running state
+
+Outpost then receives a list of commands that are executed in sequence. The next time outpost synchronizes with
+fortitude, the result of the commands execution is sent to the server and displayed in the fortitude UI.
+
+Fortitude supports sending the following commands to an outpost agent:
+
+* [Apply State] - change the state of installed modules
+* [Agent Update] - update the agent to a newer version
+
+Manually running synchronize from the command line:
+
+```
+bin/outpost sync
+```
+
+##### Apply State
+
+Instead of managing modules separately, it's possible to specify a desired state to reach and outpost will perform all
+the necessary steps automatically. This means it will download, install, configure, start, stop and uninstall
+modules in the correct sequence until the desired state is reached.
+
+This command is rarely used directly; it's mainly invoked from the fortitude server to apply a new desired state.
+
+```
+bin/outpost state apply --state <new-state>
+```
+
+The `new-state` can be a file path or a complete parseable JSON string.
+
+##### Agent Update
+
+Outpost agent is capable of self-updating. Supporting outpost agent self-update requires that the outpost agent be
+installed in a directory named `outpost-current`, for example `/opt/outpost/outpost-current`.
+
+The new outpost version is downloaded from the same registry as all other modules following the same semantics.
+The new version is unpacked into a sibling directory of the `outpost-current` directory and then the directory names are
+switched.
+
+```
+bin/outpost agent update --version <new-version>
+```
+
+Place the configuration file in the parent directory of `outpost-current` so that the updated version of outpost will
+locate it as well. See [Agent Configuration] for details of the configuration file.
+
+```
+-<parent dir>
+  |-outpost-current
+  |  |- bin
+  |  |- lib
+  |  |- package.json
+  |  |- node
+  |-outpost-0.1.9
+  |  |- ...
+  |-opconfig.json
+
+```
+
+# Modules
 
 An outpost module is a container of executables, files and control scripts. The control scripts are used
 by outpost to manage the lifecycle of a module.
