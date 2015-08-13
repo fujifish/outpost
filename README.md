@@ -78,7 +78,7 @@ form such as a tar file. Place the node executable in the root folder of the out
  |- bin
  |- lib
  |- package.json
- |- node
+ '- node
 
 ```
 
@@ -207,10 +207,10 @@ locate it as well. See [Agent Configuration](#agent-configuration) for details o
   |  |- bin
   |  |- lib
   |  |- package.json
-  |  |- node
+  |  '- node
   |-outpost-0.1.9
-  |  |- ...
-  |-opconfig.json
+  |  '- ...
+  '-opconfig.json
 
 ```
 
@@ -277,11 +277,11 @@ For example:
   |- redis
   |  |- redis-2.8.19
   |  |  |- redis-2.8.19-linux.tar.gz
-  |  |  |- redis-2.8.19-darwin.tar.gz
-  |- logrotate
-  |  |- logrotate-3.9.0
-  |  |  |- logrotate-3.9.0-linux.tar.gz
-  |  |  |- logrotate-3.9.0-darwin.tar.gz
+  |  |  '- redis-2.8.19-darwin.tar.gz
+  '- logrotate
+     '- logrotate-3.9.0
+        |- logrotate-3.9.0-linux.tar.gz
+        '- logrotate-3.9.0-darwin.tar.gz
 ```
 
 ### Module Lifecycle
@@ -533,7 +533,7 @@ Once installed and configured, this module starts a redis-server on a configurab
 |-module.json
 |-start.js
 |-stop.js
-|-redis-server
+'-redis-server
 
 ```
 
@@ -658,7 +658,7 @@ of submodules in the correct order.
 A module script can execute a script of a submodule by using the `outpost.script()` function,
 however it is restricted to running the _same lifecycle_ script only.
 This means that the `configure` script cannot execute the `start` script of a submodule,
-only the `configure` script can be executed.
+only the `configure` script of the submodule can be executed.
 
 ## License
 
