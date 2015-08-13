@@ -263,6 +263,19 @@ Here is a complete module.json example of a redis module:
 
 In this case, the full name of the module is `redis@2.8.19`.
 
+### Module Creation
+
+To create a module run the following command:
+
+```
+bin/outpost module pack --dir <module-dir> --out <out-dir>
+```
+
+This will create a package file suitable for serving from the registry. Optional command line options:
+
+* `module-dir` is the module directory to pack, which is expected to contain a module.json file (defaults to "module").
+* `out-dir` is the directory where the output module is to be written (defaults to ".")
+
 ### Modules Registry
 
 Modules are hosted in *modules registry*. The registry is a static file http server that outpost contacts
@@ -281,7 +294,7 @@ For example:
   '- logrotate
      '- logrotate-3.9.0
         |- logrotate-3.9.0-linux.tar.gz
-        '- logrotate-3.9.0-darwin.tar.gz
+        '- logrotate-3.9.0.tar.gz
 ```
 
 ### Module Lifecycle
