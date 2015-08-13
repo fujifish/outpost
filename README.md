@@ -162,8 +162,8 @@ fortitude, the result of the commands execution is sent to the server and displa
 
 Fortitude supports sending the following commands to an outpost agent:
 
-* [Apply State][apply-state] - change the state of installed modules
-* [Agent Update][agent-update] - update the agent to a newer version
+* [Apply State](#apply-state) - change the state of installed modules
+* [Agent Update](#agent-update) - update the agent to a newer version
 
 Manually running synchronize from the command line:
 
@@ -199,7 +199,7 @@ bin/outpost agent update --version <new-version>
 ```
 
 Place the configuration file in the parent directory of `outpost-current` so that the updated version of outpost will
-locate it as well. See [Agent Configuration][agent-configuration] for details of the configuration file.
+locate it as well. See [Agent Configuration](#agent-configuration) for details of the configuration file.
 
 ```
 -<parent dir>
