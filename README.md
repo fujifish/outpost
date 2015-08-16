@@ -458,6 +458,18 @@ utility functions to to ease their development.
 
 The configuration object that is passed to the script during the execution of the phase.
 
+##### outpost.proxy
+
+The proxy information configured for this outpost agent or `null` if there is no proxy configured.
+The proxy information is shared with modules so that they can configure themselves to use it without needing
+to redefine the proxy information separately for each module.
+
+The proxy configuration contains the following fields:
+
+* `url` - proxy url of the form http[s]://[user:password@]hostname[:port]
+* `authType` - either `basic` or `ntlm`
+* `ntlmDomain` - the NTLM domain if the authentication is NTLM
+
 ##### outpost.log(message)
 
 Log a message to the outpost log
