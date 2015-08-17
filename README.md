@@ -49,7 +49,7 @@ additional information about the outpost agent - such as which customer the spec
 
 The outpost agent is responsible for performing the following:
 
-* Perform commands received from the command line
+* Perform [commands](#agent-commands) received from the command line
 * Periodically [synchronize](#agent-synchronize) with the fortitude server
 * Monitor module processes and relaunch failed processes (similar to what [forever](https://github.com/foreverjs/forever) does)
 
@@ -148,7 +148,7 @@ bin/outpost agent stop
 
 This will stop the outpost agent.
 
-## Commands
+## Agent Commands
 
 Outpost supports running several commands to control modules.
 
