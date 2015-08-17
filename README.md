@@ -28,7 +28,7 @@ several problems:
 * Supportability - it's difficult to know when something goes wrong, or what went wrong
 * Maintainability - it's difficult to perform changes and upgrades
 
-Installing outpost and connecting it to a fortitude server, it's possible to get all
+Installing outpost and connecting it to a fortitude server enables getting all
 the visibility, supportability and maintainability we need.
 
 ### So Why Not Use Puppet/Chef/SaltStack/Ansible?
@@ -50,7 +50,7 @@ additional information about the outpost agent - such as which customer the spec
 The outpost agent is responsible for performing the following:
 
 * Perform commands received from the command line
-* Periodically synchronize with the fortitude server
+* Periodically [synchronize](#agent-synchronize) with the fortitude server
 * Monitor module processes and relaunch failed processes (similar to what [forever](https://github.com/foreverjs/forever) does)
 
 ### Agent Installation
@@ -82,13 +82,14 @@ form such as a tar file. Place the node executable in the root folder of the out
 
 ```
 
-In addition, you'd probably want to add an upstart script for starting outpost on machine start up, but this
-is out of scope of this documentation.
+In addition, you'd probably want to add an upstart or init script for starting outpost on machine start up, but this
+is out of scope for this documentation.
 
 ### Agent Configuration
 
-Outpost configuration is maintained in a file named `opconfig.json`. Outpost locates this file by traversing the
-directories upwards until it finds the file, so placing it in the parent directory of the outpost installation is the
+Outpost configuration is maintained in a file named `opconfig.json`.
+Outpost locates this file by traversing the directories upwards from the `bin` directory
+until it finds the file, so placing it in the parent directory of the outpost installation is the
 preferred location.
 
 #### Configuration Fields
@@ -147,25 +148,38 @@ bin/outpost agent stop
 
 This will stop the outpost agent.
 
+## Commands
+
+Outpost supports running several commands to control modules.
+
+* [synchronize](#agent-synchronize) - synchronize now with the fortitude server
+* [apply state](#apply-state) - change the whole state of installed modules
+* [install module](#install-phase) - install a single module
+* [configure module](#configure-phase) - configure a single module
+* [start module](#start-phase) - start a single module
+* [stop module](#stop-phase) - stop a single module
+* [uninstall module](#uninstall-phase) - uninstall a single module
+
 ### Agent Synchronize
 
-Outpost synchronizes with the fortitude server periodically by sending it update status information and retrieving
-commands to execute. The `syncFrequency` configuration field specifies how often outpost will contact fortitude.
+Outpost synchronizes with the fortitude server periodically by sending it latest status information and retrieving
+commands to execute. The `syncFrequency` configuration field specifies how often outpost will sync with fortitude.
 
 When synchronizing with fortitude, outpost first sends the following information:
 
 * general information about the agent (platform, agent version, node version, etc.)
 * currently installed modules, their configuration and their running state
 
-Outpost then receives a list of commands that are executed in sequence. The next time outpost synchronizes with
-fortitude, the result of the commands execution is sent to the server and displayed in the fortitude UI.
+Outpost then receives a list of commands that are to be executed in sequence.
+The result of the commands execution is sent to fortitude upon completion of the command and
+the result is displayed in the fortitude UI.
 
 Fortitude supports sending the following commands to an outpost agent:
 
 * [Apply State](#apply-state) - change the state of installed modules
 * [Agent Update](#agent-update) - update the agent to a newer version
 
-Manually running synchronize from the command line:
+##### Command Line Synchronize
 
 ```
 bin/outpost sync
@@ -176,6 +190,8 @@ bin/outpost sync
 Instead of managing modules separately, it's possible to specify a desired state to reach and outpost will perform all
 the necessary steps automatically. This means it will download, install, configure, start, stop and uninstall
 modules in the correct sequence until the desired state is reached.
+
+##### Command Line Apply State
 
 This command is rarely used directly; it's mainly invoked from the fortitude server to apply a new desired state.
 
@@ -314,7 +330,7 @@ The script to run is defined in `module.json` under the `scripts` element.
 "scripts": {
   "configure": "configure.js",
   "start": "start.js",
-  "stop": "stop.js",
+  "stop": "stop.js"
 }
 
 ```
@@ -446,7 +462,7 @@ bin/outpost uninstall <name>
 
 Module lifecycle scripts are invoked by outpost during phase execution. A script is responsible for performing all the
 necessary tasks to complete the phase successfully. Not all modules require running a script in every phase.
-In most cases, the `configure`, `start` and `stop` phases will require a script.
+In most cases, only the `configure`, `start` and `stop` phases will require a script.
 
 #### The `outpost` Object
 
@@ -663,7 +679,7 @@ outpost.unmonitor({name: 'redis'}, function(err) {
 ```
 
 The `stop.js` script unregisters the 'redis' process from the outpost process monitor service. This will automatically
-kill stop the process.
+stop the process.
 
 The last thing the `stop.js` script does is call `outpost.done()` to specify the successful completion of the script.
 
@@ -680,7 +696,7 @@ of submodules in the correct order.
 
 #### Submodule Lifecycle Scripts
 
-A module script can execute a script of a submodule by using the `outpost.script()` function,
+A module script can execute a script of a submodule by using the [outpost.script()](#outpostscriptmodule-config-cb) function,
 however it is restricted to running the _same lifecycle_ script only.
 This means that the `configure` script cannot execute the `start` script of a submodule,
 only the `configure` script of the submodule can be executed.
