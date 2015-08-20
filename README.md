@@ -594,7 +594,8 @@ Register a process to be monitored by outpost. Outpost will start the process an
  * `gid` - group id to use for the launched process. defaults to the outpost group id
  * `timeout` - time in seconds to wait for the process to actually start. defaults to 10 seconds
  * `logFile` - the log file for the the process stdout and stderr. defaults to the logsDir setting as specified in the outpost configuration
-* `pidFile` - a custom pid file that stores the process id to monitor. defaults to the process id of the process that is launched
+ * `pidFile` - a custom pid file that stores the process id to monitor. defaults to the process id of the process that is launched
+ * `stopSignal` - the signal to use to stop the process. default is SIGTERM
 * `cb` - a callback to be invoked when the process has been launched. The callback receives an error if the process failed to launch
 
 ##### outpost.unmonitor(info, cb)
