@@ -1,0 +1,15 @@
+{
+  "name": "my-server",
+  "version": "1.0.0",
+  "submodules": [],
+  "scripts": {
+    "configure": "configure.js",
+    "start": "start.js",
+    "stop": "stop.js"
+  },
+  "schema": {
+    "configure": {
+      "port": {"type": "integer", "title": "MyServer Port", "default": 8989, "minimum": 1025, "maximum": 65535, "required": true}
+    }
+  }
+}

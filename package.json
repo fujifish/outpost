@@ -1,6 +1,6 @@
 {
   "name": "outpost",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Remote application installation, configuration and monitoring",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
@@ -38,9 +38,13 @@
     "proxying-agent": "0.1.6",
     "tar-fs": "1.7.0"
   },
+  "devDependencies": {
+    "http-server": "0.8.0"
+  },
   "main": "index.js",
   "bin": {
-    "outpost": "./bin/outpost"
+    "outpost": "./bin/outpost",
+    "registry": "./bin/registry-server"
   },
   "files": [
     "index.js",

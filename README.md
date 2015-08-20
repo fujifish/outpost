@@ -45,6 +45,84 @@ Outpost is also designed to provide visibility into the application level of you
 When your cloud app provides services to many customers, outpost and fortitude can be plugged-in to your application data to reflect
 additional information about the outpost agent - such as which customer the specific outpost agent is servicing.
 
+# Quick Start Example
+
+#### 1. Install Outpost
+
+```bash
+# install outpost
+> git clone https://github.com/capriza/outpost
+> cd outpost
+> npm install
+```
+
+#### 2. Init Agent
+
+```bash
+> bin/outpost agent init
+-----------------------------------------
+Agent name:  my agent
+Root folder for outpost files: /tmp
+Registry url:  http://localhost:7878
+Fortitude url:
+Proxy url:
+Internal CLI server port:  (7608)
+-----------------------------------------
+This is the configuration that will be saved:
+{
+  "name": "my agent",
+  "root": "/tmp",
+  "registry": "http://localhost:7878",
+  "cliport": "7608",
+  "id": "0d75420ca81f"
+}
+Save configuration? (y/n):  y
+-----------------------------------------
+```
+
+#### 3. Start Agent
+
+```bash
+> bin/outpost agent start
+```
+
+#### 4. Start Sample Registry Server
+
+Start a local running [http server](https://github.com/indexzero/http-server)
+for serving trh sample module. It's only here for the sake of this example.
+
+```bash
+> node_modules/.bin/http-server ./examples -p 7878 &
+```
+
+#### 5. Pack MyServer Sample Module
+
+MyServer is a sample module residing in the `examples` directory.
+
+```bash
+> bin/outpost module pack --dir examples/my-server/my-server-1.0.0/module --out examples/my-server/my-server-1.0.0
+```
+
+#### 6. Install MyServer Module
+
+```bash
+> bin/outpost install my-server@1.0.0
+```
+
+#### 7. Configure MyServer Module
+
+```bash
+> bin/outpost configure my-server --config '{"port": 8989}'
+```
+
+#### 8. Start MyServer Module
+
+```bash
+> bin/outpost start my-server
+```
+
+Open up your browser at `http://localhost:8989`, you should get a `cool` message.
+
 # Outpost Agent
 
 The outpost agent is responsible for performing the following:
