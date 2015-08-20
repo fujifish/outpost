@@ -1,6 +1,6 @@
 {
   "name": "outpost",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Remote application installation, configuration and monitoring",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
@@ -39,6 +39,9 @@
     "tar-fs": "1.7.0"
   },
   "main": "index.js",
+  "bin": {
+    "outpost": "./bin/outpost"
+  },
   "files": [
     "index.js",
     "lib",
