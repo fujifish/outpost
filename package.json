@@ -43,8 +43,7 @@
   },
   "main": "index.js",
   "bin": {
-    "outpost": "./bin/outpost",
-    "registry": "./node_modules/http-server/bin/registry-server"
+    "outpost": "./bin/outpost"
   },
   "files": [
     "index.js",
