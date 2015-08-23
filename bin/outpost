@@ -223,7 +223,8 @@ function _handleCommand(command, cb) {
       process.stdout.write(data);
     });
     res.on('end', function() {
-      cb && cb();
+      var result = JSON.parse(res.trailers['command-result']);
+      cb && cb(result.result === 'error', result.msg);
     });
   });
 
@@ -248,7 +249,7 @@ function _handleCommand(command, cb) {
 // start processing the command
 _handleCommand(command, function(err, message) {
   if (message) {
-    console.log((err ? (err + ': ') : '') + message);
+    console.log((err ? ('Error: ') : '') + message);
   }
 
   if (err) {
