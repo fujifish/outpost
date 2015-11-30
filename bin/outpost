@@ -222,10 +222,20 @@ function _handleCommand(command, cb) {
     res.on('data', function(data) {
       process.stdout.write(data);
     });
+
     res.on('end', function() {
-      var result = JSON.parse(res.trailers['command-result']);
+      var result = res.trailers['command-result'];
+      if (result) {
+        result = JSON.parse(result);
+      } else {
+        result = {result: 'error', msg: 'missing command result'};
+      }
       cb && cb(result.result === 'error', result.msg);
     });
+  });
+
+  req.on('socket', function(socket) {
+    socket.setKeepAlive(true);
   });
 
   req.on('error', function(e) {
