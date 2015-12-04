@@ -546,17 +546,19 @@ In most cases, only the `configure`, `start` and `stop` phases will require a sc
 
 An object named `outpost` is available in the global scope of an executed script.
 The `outpost` object provides functions that are necessary to execute the script correctly as well as some
-utility functions to to ease their development.
+utility functions.
+
+##### outpost.opconfig
+
+The outpost configuration.
 
 ##### outpost.config
 
-The configuration object that is passed to the script during the execution of the phase.
+The configuration specific to the script execution.
 
 ##### outpost.proxy
 
 The proxy information configured for this outpost agent or `null` if there is no proxy configured.
-The proxy information is shared with modules so that they can configure themselves to use it without needing
-to redefine the proxy information separately for each module.
 
 The proxy configuration contains the following fields:
 
@@ -624,6 +626,16 @@ In all other cases the Mustache template engine is used.
 * `template` - input template. may be a file name or the complete template string
 * `context` - the context object for rendering the template
 * `output` - the output file to contain to template processing result
+
+##### outpost.http(options, cb)
+
+Perform an HTTP request, automatically going through the proxy if one is defined for this agent.
+
+* `options` - request options:
+  * `url` - (required) target of the request
+  * `method` - request method (GET, PUT, POST, DELETE). default is GET
+  * `data` - data to send on the request. default is `undefined`.
+* `cb` - invoked when the request is done with `(err, data, response)` where `data` is the complete body of the response.
 
 ##### outpost.exec(cmd, options, cb)
 
