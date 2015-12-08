@@ -269,6 +269,9 @@ Instead of managing modules separately, it's possible to specify a desired state
 the necessary steps automatically. This means it will download, install, configure, start, stop and uninstall
 modules in the correct sequence until the desired state is reached.
 
+If during the application of the new state an error occurs then outpost will automatically rollback to the previous state
+and report the error.
+
 ##### Command Line Apply State
 
 This command is rarely used directly; it's mainly invoked from the fortitude server to apply a new desired state.
