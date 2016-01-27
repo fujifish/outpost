@@ -645,6 +645,22 @@ Perform an HTTP request, automatically going through the proxy if one is defined
   * `data` - data to send on the request. default is `undefined`.
 * `cb` - invoked when the request is done with `(err, data, response)` where `data` is the complete body of the response.
 
+##### outpost.tail(file, [limit,] cb)
+
+Read lines from the end of the specified file up to limit number of bytes and return the contents.
+
+* `file` - the file to read lines from the end
+* `limit` - limit maximum number of bytes to read. default is 10k
+* `cb` - callback of the form `(err, content)`
+
+##### outpost.logTail(file, [limit,] cb)
+
+Read lines from the end of the specified file up to limit number of bytes and print the contents to the outpost log.
+
+* `file` - the file to read lines from the end
+* `limit` - limit maximum number of bytes to read. default is 10k
+* `cb` - callback of the form `(err)`
+
 ##### outpost.exec(cmd, options, cb)
 
 Execute a command line. `stderr` is automatically redirected to `stdout` so there is no need to specify
