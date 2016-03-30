@@ -6,37 +6,15 @@ var fs = require('fs');
 var util = require('util');
 var path = require('path');
 var http = require('http');
+var utilities = require('../lib/utilities');
 var Outpost = require('../lib/outpost');
 var Cache = require('../lib/cache');
-
-/**
- * try to find the outpost configuration file by traveling up the file system
- * and checking every folder
- */
-function _findOutpostConfig(dir) {
-  // reached the root
-  var parent = path.resolve(dir, '..');
-  if (parent === dir) {
-    return null;
-  }
-
-  try {
-    var file = path.resolve(dir, 'opconfig.json');
-    fs.openSync(file, 'r');
-    return file;
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return _findOutpostConfig(parent);
-    }
-    return null;
-  }
-}
 
 /**
  *  load and parse the outpost configuration
  */
 function _outpostConfig(config) {
-  config = config || _findOutpostConfig(__dirname);
+  config = config || utilities.findFile('opconfig.json', __dirname);
   if (!config) {
     return null;
   }
