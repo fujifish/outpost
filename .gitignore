@@ -31,3 +31,4 @@ node_modules
 registry
 test_modules
 opconfig.json
+optags.json
