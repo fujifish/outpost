@@ -93,6 +93,16 @@ function _handleCommand(command, cb) {
     return;
   }
 
+  // special handling of genkeys command
+  if (command.type === 'genkeys') {
+    console.log('generating new ' + command.curve + ' key pair...');
+    var ec = new require('elliptic').ec(command.curve);
+    var keyPair = ec.genKeyPair();
+    var result = 'private: ' + keyPair.getPrivate('hex') +'\n' + 'public: ' + keyPair.getPublic(true, 'hex');
+    cb && cb(null, result);
+    return;
+  }
+
   // special handling of module commands
   if (command.type === 'module') {
     switch (command.action) {

@@ -1,6 +1,6 @@
 {
   "name": "outpost",
-  "version": "0.5.7",
+  "version": "0.6.0",
   "description": "Remote application installation, configuration and monitoring",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
@@ -29,6 +29,7 @@
     "ascii-table": "0.0.8",
     "chalk": "1.0.0",
     "ejs": "2.3.2",
+    "elliptic": "6.2.3",
     "fs-extra": "0.18.4",
     "logrotate-stream": "0.2.5",
     "logrotator": "1.0.1",
