@@ -44,6 +44,15 @@ function _outpostConfig(config) {
   };
 }
 
+function _verifyUser() {
+  try {
+    var stat = fs.statSync(__filename);
+    return stat.uid === process.getuid();
+  } catch(e) {
+    return false;
+  }
+}
+
 // process command line options to get the command to execute
 var command = require('../lib/cli').process();
 
@@ -157,6 +166,10 @@ function _handleCommand(command, cb) {
         console.log(JSON.stringify(opconfig, null, 2));
         return;
       case 'restart':
+        if (!_verifyUser()) {
+          cb && cb(true, 'agent cannot be started under the current user');
+          return;
+        }
         _handleCommand({type: 'agent', action: 'stop', silent: true}, function(err, message) {
           if (message) {
             console.log(message);
@@ -169,6 +182,10 @@ function _handleCommand(command, cb) {
         return;
 
       case 'start':
+        if (!_verifyUser()) {
+          cb && cb(true, 'agent cannot be started under the current user');
+          return;
+        }
 
         var args = [__filename, '--daemon'];
         if (command.opConfig) {
