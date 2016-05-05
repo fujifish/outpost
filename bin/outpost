@@ -14,23 +14,34 @@ var Cache = require('../lib/cache');
  *  load and parse the outpost configuration
  */
 function _outpostConfig(config) {
+  var file = null;
   config = config || utilities.findFile('opconfig.json', __dirname);
   if (!config) {
-    return null;
+    return {
+      file: null,
+      opconfig: null
+    };
   }
 
   var conf = {};
   try {
     // either given a config as string or file name
     if (config.trim().charAt(0) !== '{') {
-      config = fs.readFileSync(path.resolve(path.resolve(__dirname, '..'), config));
+      file = path.resolve(path.resolve(__dirname, '..'), config);
+      config = fs.readFileSync(file);
     }
     conf = JSON.parse(config);
   } catch (err) {
     console.error('failed to load outpost config: ' + err.message);
-    return null;
+    return {
+      file: null,
+      opconfig: null
+    };
   }
-  return conf;
+  return {
+    file: file,
+    opconfig: conf
+  };
 }
 
 // process command line options to get the command to execute
@@ -41,7 +52,8 @@ var command = require('../lib/cli').process();
  */
 function _handleCommand(command, cb) {
 
-  var opconfig = _outpostConfig(command.opConfig);
+  var outpostConfig = _outpostConfig(command.opConfig);
+  var opconfig = outpostConfig.opconfig;
 
   // special handling of starting outpost in daemon mode
   if (command.type === 'daemon') {
@@ -130,7 +142,7 @@ function _handleCommand(command, cb) {
         require('../lib/init-config').initConfig(defaults, function(result) {
           if (result) {
             // save the config
-            var output = command.options.output || path.resolve(process.cwd(), 'opconfig.json');
+            var output = command.options.output || outpostConfig.file || path.resolve(process.cwd(), 'opconfig.json');
             try {
               fs.writeFileSync(output, JSON.stringify(result, null, 2));
               cb(null, 'outpost configuration saved to ' + output);
