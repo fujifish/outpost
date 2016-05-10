@@ -44,12 +44,19 @@ function _outpostConfig(config) {
   };
 }
 
-function _verifyUser() {
+function _runAs(opconfig) {
+  var stat = fs.statSync(__filename);
+  var user = opconfig.runas || stat.uid;
+  var old = process.getuid();
   try {
-    var stat = fs.statSync(__filename);
-    return stat.uid === process.getuid();
+    process.setuid(user);
+    return {
+      user: old !== process.getuid() ? user : null
+    }
   } catch(e) {
-    return false;
+    return {
+      error: 'error running as user ' + user + ': ' + e.message
+    };
   }
 }
 
@@ -166,10 +173,6 @@ function _handleCommand(command, cb) {
         console.log(JSON.stringify(opconfig, null, 2));
         return;
       case 'restart':
-        if (!_verifyUser()) {
-          cb && cb(true, 'agent cannot be started under the current user');
-          return;
-        }
         _handleCommand({type: 'agent', action: 'stop', silent: true}, function(err, message) {
           if (message) {
             console.log(message);
@@ -182,8 +185,9 @@ function _handleCommand(command, cb) {
         return;
 
       case 'start':
-        if (!_verifyUser()) {
-          cb && cb(true, 'agent cannot be started under the current user');
+        var runAsResult = _runAs(opconfig);
+        if (runAsResult.error) {
+          cb && cb(true, runAsResult.error);
           return;
         }
 
