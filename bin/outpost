@@ -44,21 +44,6 @@ function _outpostConfig(config) {
   };
 }
 
-function _runAs(opconfig) {
-  var stat = fs.statSync(__filename);
-  var user = opconfig.runas || stat.uid;
-  var old = process.getuid();
-  try {
-    process.setuid(user);
-    return {
-      user: old !== process.getuid() ? user : null
-    }
-  } catch(e) {
-    return {
-      error: 'error running as user ' + user + ': ' + e.message
-    };
-  }
-}
 
 // process command line options to get the command to execute
 var command = require('../lib/cli').process();
@@ -73,6 +58,11 @@ function _handleCommand(command, cb) {
 
   // special handling of starting outpost in daemon mode
   if (command.type === 'daemon') {
+    var runAsResult = utilities.runAs(opconfig.runas);
+    if (runAsResult.error) {
+      cb && cb(true, runAsResult.error);
+      return;
+    }
 
     function _reportResult(result) {
       if (process.send) {
@@ -185,12 +175,6 @@ function _handleCommand(command, cb) {
         return;
 
       case 'start':
-        var runAsResult = _runAs(opconfig);
-        if (runAsResult.error) {
-          cb && cb(true, runAsResult.error);
-          return;
-        }
-
         var args = [__filename, '--daemon'];
         if (command.opConfig) {
           args.push('--opconfig');
