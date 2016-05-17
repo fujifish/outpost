@@ -244,15 +244,11 @@ function _handleCommand(command, cb) {
   });
 
   req.on('error', function(e) {
-    var message;
-    var error = 'error';
+    var message = 'error communicating with the outpost agent: ' + e.message;
     if (e.code === 'ECONNREFUSED') {
-      error = null;
       message = 'agent not running';
-    } else {
-      message = 'error communicating with the outpost agent: ' + e.message;
     }
-    cb && cb(error, message);
+    cb && cb('error', message);
   });
 
   // write data to request body
