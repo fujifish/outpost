@@ -1,6 +1,6 @@
 {
   "name": "outpost",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Remote application installation, configuration and monitoring",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
