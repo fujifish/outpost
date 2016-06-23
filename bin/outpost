@@ -86,20 +86,10 @@ function _handleCommand(command, cb) {
       return;
     }
 
-    // make sure the config has an agent name
-    if (!opconfig.name || opconfig.name.length === 0) {
-      _reportResult('missing name in outpost config');
-      process.nextTick(function() { process.exit(1); });
-      return;
-    }
-
     var outpost = new Outpost(opconfig);
     outpost.start(function(err) {
       // notify the spawner that we're ready
       _reportResult(err || 'agent started');
-      if (err) {
-        process.nextTick(function() { process.exit(1); });
-      }
     });
 
     outpost.on('close', function() {
