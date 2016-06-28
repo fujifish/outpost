@@ -134,7 +134,13 @@ function _handleCommand(command, cb) {
 
       case 'init':
         var defaults = opconfig || {};
-        defaults = util._extend(defaults, command.options);
+        if (command.options.defaults) {
+          var elems = command.options.defaults.split(',');
+          elems.forEach(function(e) {
+            var parts = e.split('=');
+            defaults[parts[0].trim()] = parts.length > 1 ? parts[1].trim() : '.';
+          });
+        }
         require('../lib/init-config').initConfig(defaults, function(result) {
           if (result) {
             // save the config
