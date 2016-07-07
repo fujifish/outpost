@@ -64,24 +64,31 @@ function _handleCommand(command, cb) {
       return;
     }
 
-    function _reportResult(result) {
-      if (process.send) {
-        process.send(result);
-      } else {
-        console.log(result);
+    function _message(message) {
+      if (typeof message === 'string') {
+        message = {log: message};
       }
+      if (process.send) {
+        process.send(JSON.stringify(message));
+      } else {
+        console.log(message);
+      }
+    }
+
+    function _result(message) {
+      _message({result: message})
     }
 
     process.title = 'outpost-agent';
     if (!opconfig) {
-      _reportResult('outpost config not specified');
+      _result('outpost config not specified');
       process.nextTick(function() { process.exit(1); });
       return;
     }
 
     // make sure the config has an agent id
     if (!opconfig.id || opconfig.id.length === 0) {
-      _reportResult('missing id in outpost config');
+      _result('missing id in outpost config');
       process.nextTick(function() { process.exit(1); });
       return;
     }
@@ -89,8 +96,11 @@ function _handleCommand(command, cb) {
     var outpost = new Outpost(opconfig);
     outpost.start(function(err) {
       // notify the spawner that we're ready
-      _reportResult(err || 'agent started');
-    });
+      _result(err || 'agent started');
+      if (err) {
+        process.nextTick(function() { process.exit(1); });
+      }
+    }, _message);
 
     outpost.on('close', function() {
       setImmediate(function() {
@@ -194,8 +204,15 @@ function _handleCommand(command, cb) {
         });
 
         child.on('message', function(message) {
+          message = JSON.parse(message);
+          if (message.log) {
+            console.log(message.log);
+            return;
+          }
+
           child.disconnect();
           child.unref();
+          message = message.result;
           if (message === 'agent started' || message === 'agent is already running') {
             cb && cb(null, message);
           } else {
