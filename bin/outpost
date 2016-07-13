@@ -27,4 +27,4 @@ while [ "/" !=  "$NODEDIR" ]; do
     fi
 done
 
-$NODE $SCRIPTDIR/agent
+$NODE $SCRIPTDIR/agent $@
