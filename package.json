@@ -1,7 +1,7 @@
 {
   "name": "outpost",
-  "version": "0.12.2",
-  "description": "Remote application installation, configuration and monitoring",
+  "version": "1.0.0",
+  "description": "Agent for remote application installation, configuration and monitoring",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
     "Nadav Fischer <nadav.fischer@capriza.com>",
@@ -30,7 +30,7 @@
     "chalk": "1.0.0",
     "ejs": "2.3.2",
     "elliptic": "6.2.3",
-    "fs-extra": "0.18.4",
+    "fs-extra": "0.30.0",
     "logrotate-stream": "0.2.5",
     "logrotator": "1.0.1",
     "minimist": "1.1.1",
