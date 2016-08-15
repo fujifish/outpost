@@ -1,16 +1,17 @@
 ![outpost logo](/outpost.png)
 
-Outpost is a remote module installation, management and monitoring agent. When outpost is installed on a machine,
-it is capable of installing, configuring, starting, stopping and monitoring various modules.
+Outpost is a software management and monitoring agent. Outpost configures, starts and continuously monitors 
+running processes to make sure they stay running. 
 
-When we say *remote management*, we mean that the main use case for using outpost is managing outpost modules lifecycle
-through [fortitude](https://github.com/capriza/fortitude), which is the outpost server.
+Outpost is built from the ground up to be very secure:
 
-[Fortitude](https://github.com/capriza/fortitude) provides complete visibility into all running outpost agents,
-the modules that every outpost is managing and the outpost agent state. It provides the ability to centrally and remotely
-control the lifecycle and state of every module in every agent.
+* Does not run as root
+* Only privately signed modules can be installed
+* No inbound connection
+* No arbitrary commands, only specific lifecycle commands (install, configure, start, etc.)
 
-Outpost can also be controlled from the command line directly on the machine where outpost is installed.
+[Fortitude](https://github.com/capriza/fortitude) is the outpost server, providing visibility into running outpost 
+agents and the state of modules that every outpost agent is managing.
 
 ## Why?
 
@@ -19,31 +20,26 @@ This whole thing may ring a bell to those familiar with
 tools such as Puppet, Chef, SaltStack and Ansible.
 
 Outpost is different. It is not intended for automating the configuration and management of *infrastructure*.
-Outpost is used to automate the lifecycle of *application level* software. The primary use case is for controlling
+Outpost is used to automate the lifecycle of *application level* software. The primary use case is for managing
 software that's installed outside of your own infrastructure, most notably on a customers infrastructure. This software
 may still connect to your cloud service, but installing it on an infrastructure that's not your own creates
 several problems:
 
 * Visibility - it's difficult to track what's installed, where and for whom
 * Supportability - it's difficult to know when something goes wrong, or what went wrong
-* Maintainability - it's difficult to perform changes and upgrades
+* Maintainability - it's difficult to perform maintenance
 
-Installing outpost and connecting it to a fortitude server enables getting all
-the visibility, supportability and maintainability we need.
+Installing outpost and connecting it to the fortitude server enables getting all
+the required visibility, supportability and maintainability.
 
 ### So Why Not Use Puppet/Chef/SaltStack/Ansible?
 
 Because these tools assume you have complete control over the infrastructure. If you can access the machine and
 install the tool agent on it then it's yours for the taking. You can do whatever you want with it.
-This is very much not the case when dealing with infrastructure that's not yours.
+This is very much _not_ the case when dealing with infrastructure that's not yours.
 
-Security and authorization is also a very big issue when installing on a customers infrastructure.
-An outpost agent must authenticate and authorize with fortitude to get things done, whereas IT management tools usually do not
-have this restriction.
-
-Outpost is also designed to provide visibility into the application level of your cloud service.
-When your cloud app provides services to many customers, outpost and fortitude can be plugged-in to your application data to reflect
-additional information about the outpost agent - such as which customer the specific outpost agent is servicing.
+Security and authorization is a very big issue when installing on a customers infrastructure.
+An outpost agent must authenticate and authorize with fortitude to get things done.
 
 # Quick Start Example
 
@@ -86,7 +82,7 @@ Save configuration? (y/n):  y
 > bin/outpost agent start
 ```
 
-#### 4. Start Sample Registry Server
+#### 4. Start Sample Registry Server (this step is not needed for production)
 
 Start a local running [http server](https://github.com/indexzero/http-server)
 for serving trh sample module. It's only here for the sake of this example.
@@ -176,6 +172,7 @@ preferred location.
 * `root` - Root folder - this is the directory that will hold the outpost data files. This should be *outside* the
 outpost installation directory
 * `registry` - Registry url - the url for the modules registry. Outpost downloads modules from this url when installing a module
+* `sigPubKey` - Module signature verification public key (33 bytes as a HEX string)
 * `fortitude` - Fortitude url - this is the fortitude server url. Leave blank if outpost should be in standalone mode
 * `auth` - Fortitude authentication key - authentication key to identify outpost with fortitude. This would normally be different
 between customers
@@ -230,7 +227,7 @@ This will stop the outpost agent.
 
 Outpost supports running several commands to control modules.
 
-* [synchronize](#agent-synchronize) - synchronize now with the fortitude server
+* [sync](#agent-synchronize) - synchronize now with the fortitude server
 * [apply state](#apply-state) - change the whole state of installed modules
 * [install module](#install-phase) - install a single module
 * [configure module](#configure-phase) - configure a single module
@@ -241,20 +238,19 @@ Outpost supports running several commands to control modules.
 ### Agent Synchronize
 
 Outpost synchronizes with the fortitude server periodically by sending it latest status information and retrieving
-commands to execute. The `syncFrequency` configuration field specifies how often outpost will sync with fortitude.
+a new state to apply. The `syncFrequency` configuration field specifies how often outpost will sync with fortitude.
 
 When synchronizing with fortitude, outpost first sends the following information:
 
 * general information about the agent (platform, agent version, node version, etc.)
-* currently installed modules, their configuration and their running state
+* currently installed modules, configuration and running state
 
-Outpost then receives a list of commands that are to be executed in sequence.
-The result of the commands execution is sent to fortitude upon completion of the command and
-the result is displayed in the fortitude UI.
+If necessary, outpost will receive a new state to apply. After changes are made, the result is sent back to fortitude
+to presented in the UI.
 
 Fortitude supports sending the following commands to an outpost agent:
 
-* [Apply State](#apply-state) - change the state of installed modules
+* [Apply State](#apply-state) - change the state of modules
 * [Agent Update](#agent-update) - update the agent to a newer version
 
 ##### Command Line Synchronize
