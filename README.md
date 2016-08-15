@@ -29,17 +29,14 @@ several problems:
 * Supportability - it's difficult to know when something goes wrong, or what went wrong
 * Maintainability - it's difficult to perform maintenance
 
-Installing outpost and connecting it to the fortitude server enables getting all
-the required visibility, supportability and maintainability.
-
 ### So Why Not Use Puppet/Chef/SaltStack/Ansible?
 
 Because these tools assume you have complete control over the infrastructure. If you can access the machine and
 install the tool agent on it then it's yours for the taking. You can do whatever you want with it.
 This is very much _not_ the case when dealing with infrastructure that's not yours.
 
-Security and authorization is a very big issue when installing on a customers infrastructure.
-An outpost agent must authenticate and authorize with fortitude to get things done.
+Security and authorization is a very big issue when installing on a customers infrastructure; 
+an outpost agent must authenticate and authorize with fortitude to get things done.
 
 # Quick Start Example
 
