@@ -550,7 +550,10 @@ The outpost configuration.
 
 ##### outpost.config
 
-The configuration specific to the script execution.
+The configuration specific to the script execution. Configuration string values may contain parameters of the
+form `${<param>}` that are evaluated before they are passed to the script for processing. Param names must exist 
+in the global scope, for example `${process.env['USER']}` and `${outpost.opconfig.root}` are valid values since both 
+`process` and `outpost` are objects in the global scope of the script.
 
 ##### outpost.proxy
 
