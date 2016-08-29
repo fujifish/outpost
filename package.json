@@ -1,7 +1,7 @@
 {
   "name": "outpost",
-  "version": "1.0.0",
-  "description": "Agent for remote application installation, configuration and monitoring",
+  "version": "1.1.0",
+  "description": "Agent for remote application management and monitoring",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
     "Nadav Fischer <nadav.fischer@capriza.com>",
@@ -17,11 +17,12 @@
   },
   "keywords": [
     "remote",
-    "install",
-    "installation",
-    "deploy",
-    "deployment",
+    "application",
+    "agent",
+    "manage",
+    "management",
     "monitor",
+    "monitoring",
     "configure",
     "configuration"
   ],
