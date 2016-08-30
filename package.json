@@ -37,7 +37,7 @@
     "minimist": "1.1.1",
     "mustache": "2.1.3",
     "prompt": "git+https://github.com/capriza/prompt.git",
-    "proxying-agent": "0.1.6",
+    "proxying-agent": "2.0.0",
     "revalidator": "0.3.1",
     "semver": "5.1.0",
     "tar-fs": "1.7.0"
