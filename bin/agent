@@ -57,7 +57,7 @@ function _handleCommand(command, cb) {
   let opconfig = outpostConfig.opconfig;
 
   // run as the intended user
-  let runAsResult = utilities.runAs(opconfig.runas);
+  let runAsResult = utilities.runAs((opconfig || {}).runas);
   if (runAsResult.error) {
     cb && cb(true, runAsResult.error);
     return;
