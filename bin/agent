@@ -1,18 +1,18 @@
 process.title = 'outpost-cli';
 
-var fs = require('fs');
-var util = require('util');
-var path = require('path');
-var http = require('http');
-var utilities = require('../lib/utilities');
-var Outpost = require('../lib/outpost');
-var Cache = require('../lib/cache');
+const fs = require('fs');
+const util = require('util');
+const path = require('path');
+const http = require('http');
+const utilities = require('../lib/utilities');
+const Outpost = require('../lib/outpost');
+const Cache = require('../lib/cache');
 
 /**
  *  load and parse the outpost configuration
  */
 function _outpostConfig(config) {
-  var file = null;
+  let file = null;
   config = config || utilities.findFile('opconfig.json', __dirname);
   if (!config) {
     return {
@@ -21,7 +21,7 @@ function _outpostConfig(config) {
     };
   }
 
-  var conf = {};
+  let conf = {};
   try {
     // either given a config as string or file name
     if (config.trim().charAt(0) !== '{') {
@@ -36,6 +36,8 @@ function _outpostConfig(config) {
       opconfig: null
     };
   }
+
+  conf.root = path.resolve(conf.root, '.outpost');
   return {
     file: file,
     opconfig: conf
@@ -44,23 +46,25 @@ function _outpostConfig(config) {
 
 
 // process command line options to get the command to execute
-var command = require('../lib/cli').process();
+let command = require('../lib/cli').process();
 
 /**
  * execute a command
  */
 function _handleCommand(command, cb) {
 
-  var outpostConfig = _outpostConfig(command.opConfig);
-  var opconfig = outpostConfig.opconfig;
+  let outpostConfig = _outpostConfig(command.opConfig);
+  let opconfig = outpostConfig.opconfig;
+
+  // run as the intended user
+  let runAsResult = utilities.runAs(opconfig.runas);
+  if (runAsResult.error) {
+    cb && cb(true, runAsResult.error);
+    return;
+  }
 
   // special handling of starting outpost in daemon mode
   if (command.type === 'daemon') {
-    var runAsResult = utilities.runAs(opconfig.runas);
-    if (runAsResult.error) {
-      cb && cb(true, runAsResult.error);
-      return;
-    }
 
     function _message(message) {
       if (typeof message === 'string') {
@@ -96,7 +100,7 @@ function _handleCommand(command, cb) {
       return;
     }
 
-    var outpost = new Outpost(opconfig);
+    let outpost = new Outpost(opconfig);
     outpost.start(function(err) {
       // notify the spawner that we're ready
       _result(err || 'agent started');
@@ -119,9 +123,9 @@ function _handleCommand(command, cb) {
   // special handling of genkeys command
   if (command.type === 'genkeys') {
     console.log('generating new ' + command.curve + ' key pair...');
-    var ec = new require('elliptic').ec(command.curve);
-    var keyPair = ec.genKeyPair();
-    var result = 'private: ' + keyPair.getPrivate('hex') + '\n' + 'public: ' + keyPair.getPublic(true, 'hex');
+    let ec = new require('elliptic').ec(command.curve);
+    let keyPair = ec.genKeyPair();
+    let result = 'private: ' + keyPair.getPrivate('hex') + '\n' + 'public: ' + keyPair.getPublic(true, 'hex');
     cb && cb(null, result);
     return;
   }
@@ -130,7 +134,7 @@ function _handleCommand(command, cb) {
   if (command.type === 'module') {
     switch (command.action) {
       case 'pack':
-        var cache = new Cache({});
+        let cache = new Cache({});
         cache.pack(command, function(err, filename) {
           if (err) {
             cb('module creation failed', err);
@@ -148,18 +152,18 @@ function _handleCommand(command, cb) {
     switch (command.action) {
 
       case 'init':
-        var defaults = opconfig || {};
+        let defaults = opconfig || {};
         if (command.options.defaults) {
-          var elems = command.options.defaults.split(',');
+          let elems = command.options.defaults.split(',');
           elems.forEach(function(e) {
-            var parts = e.split('=');
+            let parts = e.split('=');
             defaults[parts[0].trim()] = parts.length > 1 ? parts[1].trim() : '.';
           });
         }
         require('../lib/init-config').initConfig(defaults, function(result) {
           if (result) {
             // save the config
-            var output = command.options.output || outpostConfig.file || path.resolve(process.cwd(), 'opconfig.json');
+            let output = command.options.output || outpostConfig.file || path.resolve(process.cwd(), 'opconfig.json');
             try {
               fs.writeFileSync(output, JSON.stringify(result, null, 2));
               cb(null, 'outpost configuration saved to ' + output);
@@ -175,7 +179,7 @@ function _handleCommand(command, cb) {
         return;
 
       case 'unregister':
-        var outpostTmp = new Outpost(opconfig);
+        let outpostTmp = new Outpost(opconfig);
         outpostTmp.init(function() {
           outpostTmp.processTopLevel({type: 'unregister'}, function(result, details) {
             cb && cb(result !== 'success', details);
@@ -196,17 +200,22 @@ function _handleCommand(command, cb) {
         return;
 
       case 'start':
-        var args = [__filename, '--daemon'];
+        let args = [__filename, '--daemon'];
         if (command.opConfig) {
           args.push('--opconfig');
           args.push(command.opConfig);
         }
-        var child = require('child_process').spawn(process.execPath, args, {
+        let logFile = path.resolve(opconfig.root, 'outpost.log');
+        let outFile = fs.openSync(logFile, 'a');
+        let errFile = fs.openSync(logFile, 'a');
+        let child = require('child_process').spawn(process.execPath, args, {
           cwd: path.resolve(__dirname, '..'),
           env: process.env,
-          stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
+          stdio: ['ignore', outFile, errFile, 'ipc'],
           detached: true
         });
+        fs.closeSync(outFile);
+        fs.closeSync(errFile);
 
         child.on('message', function(message) {
           message = JSON.parse(message);
@@ -238,9 +247,9 @@ function _handleCommand(command, cb) {
     return;
   }
   delete command.opConfig;
-  var postData = JSON.stringify(command);
+  let postData = JSON.stringify(command);
 
-  var requestOptions = {
+  let requestOptions = {
     hostname: '127.0.0.1',
     port: (opconfig && opconfig.cliport) || Outpost.prototype.CLIPORT,
     path: '/',
@@ -251,13 +260,13 @@ function _handleCommand(command, cb) {
     }
   };
 
-  var req = http.request(requestOptions, function(res) {
+  let req = http.request(requestOptions, function(res) {
     res.on('data', function(data) {
       process.stdout.write(data);
     });
 
     res.on('end', function() {
-      var result = res.trailers['command-result'];
+      let result = res.trailers['command-result'];
       if (result) {
         result = JSON.parse(result);
       } else {
@@ -272,7 +281,7 @@ function _handleCommand(command, cb) {
   });
 
   req.on('error', function(e) {
-    var message = 'error communicating with the outpost agent: ' + e.message;
+    let message = 'error communicating with the outpost agent: ' + e.message;
     if (e.code === 'ECONNREFUSED') {
       message = 'agent not running';
     }
