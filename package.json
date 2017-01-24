@@ -1,6 +1,6 @@
 {
   "name": "outpost",
-  "version": "1.5.10",
+  "version": "1.5.11",
   "description": "Agent for remote application management and monitoring",
   "author": "Capriza Inc. <backend@capriza.com>",
   "maintainers": [
