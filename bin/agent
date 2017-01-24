@@ -1,6 +1,7 @@
 process.title = 'outpost-cli';
 
 const fs = require('fs');
+const fse = require('fs-extra');
 const util = require('util');
 const path = require('path');
 const http = require('http');
@@ -200,6 +201,15 @@ function _handleCommand(command, cb) {
         return;
 
       case 'start':
+        // make sure the root dir exists
+        try {
+          fse.ensureDirSync(opconfig.root, 0744);
+        } catch (err) {
+          if (err && err.code !== 'EEXIST') {
+            cb && cb('error', 'error creating outpost root directory: ' + err.message);
+            return;
+          }
+        }
         let args = [__filename, '--daemon'];
         if (command.opConfig) {
           args.push('--opconfig');
