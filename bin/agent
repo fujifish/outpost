@@ -9,43 +9,6 @@ const utilities = require('../lib/utilities');
 const Outpost = require('../lib/outpost');
 const Cache = require('../lib/cache');
 
-/**
- *  load and parse the outpost configuration
- */
-function _outpostConfig(config) {
-  let file = null;
-  config = config || utilities.findFile('opconfig.json', __dirname);
-  if (!config) {
-    return {
-      file: null,
-      opconfig: null
-    };
-  }
-
-  let conf = {};
-  try {
-    // either given a config as string or file name
-    if (config.trim().charAt(0) !== '{') {
-      file = path.resolve(path.resolve(__dirname, '..'), config);
-      config = fs.readFileSync(file);
-    }
-    conf = JSON.parse(config);
-  } catch (err) {
-    console.error('failed to load outpost config: ' + err.message);
-    return {
-      file: null,
-      opconfig: null
-    };
-  }
-
-  conf.root = path.resolve(conf.root, '.outpost');
-  return {
-    file: file,
-    opconfig: conf
-  };
-}
-
-
 // process command line options to get the command to execute
 let command = require('../lib/cli').process();
 
@@ -54,7 +17,7 @@ let command = require('../lib/cli').process();
  */
 function _handleCommand(command, cb) {
 
-  let outpostConfig = _outpostConfig(command.opConfig);
+  let outpostConfig = utilities.outpostConfig(command.opConfig);
   let opconfig = outpostConfig.opconfig;
 
   // run as the intended user
