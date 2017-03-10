@@ -1,4 +1,4 @@
-![outpost logo](/outpost.png)
+<div align="center"><img src="https://capriza.github.io/images/logos/logos-outpost.svg" height="128" /></div>
 
 Outpost is a software management and monitoring agent. Outpost configures, starts and continuously monitors 
 running processes to make sure they stay running. 
