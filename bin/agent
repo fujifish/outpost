@@ -99,6 +99,9 @@ function _handleCommand(command, cb) {
     switch (command.action) {
       case 'pack':
         let cache = new Cache({});
+        if (command.signWith === 'false') {
+          console.log('*** module signing is disabled ***');
+        }
         cache.pack(command, function(err, filename) {
           if (err) {
             cb('module creation failed', err);
