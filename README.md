@@ -361,10 +361,16 @@ In this case, the full name of the module is `redis@2.8.19`.
 To create a module run the following command:
 
 ```
-bin/outpost module pack --dir <module-dir> --out <out-dir>
+bin/outpost module pack --sign <private-key-file> --dir <module-dir> --out <out-dir>
 ```
 
-This will create a package file suitable for serving from the registry. Optional command line options:
+This will create a packed module and an accompanying signature file suitable for serving from the registry. Make sure to serve the signature file from the same directory as the module package.
+
+Required command line options:
+
+* `private-key-file` is the path to a file containing a secp256k1 private key used for signing the module. specify `false` to disable signing the packed module.
+
+Optional command line options:
 
 * `module-dir` is the module directory to pack, which is expected to contain a module.json file (defaults to "module").
 * `out-dir` is the directory where the output module is to be written (defaults to ".")
@@ -383,11 +389,15 @@ For example:
   |- redis
   |  |- redis-2.8.19
   |  |  |- redis-2.8.19-linux.tar.gz
-  |  |  '- redis-2.8.19-darwin.tar.gz
+  |  |  |- redis-2.8.19-linux.tar.gz.sign
+  |  |  |- redis-2.8.19-darwin.tar.gz
+  |  |  '- redis-2.8.19-darwin.tar.gz.sign
   '- logrotate
      '- logrotate-3.9.0
         |- logrotate-3.9.0-linux.tar.gz
-        '- logrotate-3.9.0.tar.gz
+        |- logrotate-3.9.0-linux.tar.gz.sign
+        |- logrotate-3.9.0.tar.gz
+        '- logrotate-3.9.0.tar.gz.sign
 ```
 
 ### Module Lifecycle
